@@ -72,12 +72,12 @@ export default function Sidebar() {
           Family Members
         </button> */}
 
-        <button
-          type="button"
-          className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
+        <Link
+          href="/analytics"
+          className="block w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
         >
           Analytics
-        </button>
+        </Link>
 
         {/* <button
           type="button"

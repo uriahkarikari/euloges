@@ -42,12 +42,12 @@ export default function Sidebar() {
           Memorials
         </Link>
 
-        <button
+        {/* <button
           type="button"
           className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
         >
           Tributes
-        </button>
+        </button> */}
 
         <Link
           href="/condolence-books"
@@ -58,19 +58,19 @@ export default function Sidebar() {
           <span>Book of Condolence</span>
         </Link>
 
-        <button
+        {/* <button
           type="button"
           className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
         >
           Photos & Videos
-        </button>
+        </button> */}
 
-        <button
+        {/* <button
           type="button"
           className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
         >
           Family Members
-        </button>
+        </button> */}
 
         <button
           type="button"
@@ -79,12 +79,12 @@ export default function Sidebar() {
           Analytics
         </button>
 
-        <button
+        {/* <button
           type="button"
           className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"
         >
           Settings
-        </button>
+        </button> */}
       </nav>
 
       <div className="mt-8 border-t border-gray-100 pt-5">

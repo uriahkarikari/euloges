@@ -11,7 +11,6 @@ import {
 
 import BasicInfoCard from "@/components/brochure/BasicInfoCard";
 import BrochurePreview from "@/components/brochure/BrochurePreview";
-import PrivacyCard from "@/components/brochure/PrivacyCard";
 import SectionsBuilder from "@/components/brochure/SectionsBuilder";
 import { loadBrochureFromSupabase } from "@/lib/brochureSupabase";
 
@@ -374,6 +373,29 @@ if (isCreatingNew && !hasMemorialContent) {
             Draft saved automatically.
           </p>
         )}
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <span className="text-xs font-medium text-black/40">Visibility</span>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-black/35">Family (Private)</span>
+
+            <button
+              type="button"
+              disabled
+              aria-label="Memorial visibility is currently public"
+              title="Secure family access coming soon"
+              className="relative h-6 w-11 cursor-not-allowed rounded-full bg-[#7A9B8E] opacity-80"
+            >
+              <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm" />
+            </button>
+
+            <span className="text-sm font-medium text-[#2F2F2F]">Public</span>
+          </div>
+
+          <span className="text-xs text-black/35">
+            Secure family access coming soon
+          </span>
+        </div>
       </header>
 
       <BasicInfoCard
@@ -390,13 +412,6 @@ if (isCreatingNew && !hasMemorialContent) {
       />
 
       <SectionsBuilder sections={sections} setSections={setSections} />
-
-      <PrivacyCard
-        privacy={privacy}
-        accessCode={accessCode}
-        setPrivacy={setPrivacy}
-        setAccessCode={setAccessCode}
-      />
 
       <BrochurePreview
         name={name}
@@ -421,6 +436,31 @@ if (isCreatingNew && !hasMemorialContent) {
                   ? "Memorial Published"
                   : "Ready to Publish?"}
               </h2>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <span className="text-xs font-medium text-black/40">
+                  Visibility
+                </span>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-black/35">
+                    Family (Private)
+                  </span>
+
+                  <button
+                    type="button"
+                    disabled
+                    aria-label="Memorial visibility is currently public"
+                    title="Secure family access coming soon"
+                    className="relative h-6 w-11 cursor-not-allowed rounded-full bg-[#7A9B8E] opacity-80"
+                  >
+                    <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm" />
+                  </button>
+
+                  <span className="text-sm font-medium text-[#2F2F2F]">
+                    Public
+                  </span>
+                </div>
+              </div>
 
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${
@@ -538,12 +578,6 @@ if (isCreatingNew && !hasMemorialContent) {
                   Done
                 </button>
               </div>
-
-              <p className="text-xs leading-5 text-black/40">
-                Prototype note: this memorial is currently stored only in this
-                browser. Cross-device sharing will become active when Euloges is
-                connected to its backend.
-              </p>
             </div>
           )}
         </div>

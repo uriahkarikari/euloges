@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import {
@@ -9,9 +10,15 @@ import {
 } from "@/lib/memorialRepository";
 
 export default function MemorialsPage() {
+  const router = useRouter();
   const [memorials, setMemorials] = useState<MemorialListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); 
+  
+
+  function createNewMemorial() {
+    router.push(`/create-brochure?new=${Date.now()}`);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -69,12 +76,13 @@ export default function MemorialsPage() {
             </p>
           </div>
 
-          <Link
-            href="/create-brochure"
+          <button
+            type="button"
+            onClick={createNewMemorial}
             className="rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-black"
           >
             Create Memorial
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -94,12 +102,13 @@ export default function MemorialsPage() {
             Create your first memorial to begin preserving a life story.
           </p>
 
-          <Link
-            href="/create-brochure"
-            className="mt-5 inline-block rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-sm font-medium text-white"
+          <button
+            type="button"
+            onClick={createNewMemorial}
+            className="mt-5 rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-center text-sm font-medium text-white transition hover:bg-black"
           >
             Create Memorial
-          </Link>
+          </button>
         </section>
       )}
 

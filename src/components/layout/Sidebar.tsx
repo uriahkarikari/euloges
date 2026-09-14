@@ -50,7 +50,7 @@ export default function Sidebar() {
         </button> */}
 
         <Link
-          href="/condolence-books"
+          href="/memorials"
           className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-black/60 transition hover:bg-gray-50 hover:text-[#2F2F2F]"
         >
           <BookIcon />

@@ -25,6 +25,7 @@ export default function CondolenceBooksPage() {
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
   const [bookData, setBookData] = useState<CondolenceBookData | null>(null);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const memorialId = searchParams.get("memorial");
 
@@ -32,36 +33,51 @@ export default function CondolenceBooksPage() {
 
   useEffect(() => {
     let cancelled = false;
+async function hydratePage() {
+  setLoading(true);
 
-    async function hydratePage() {
-      if (!memorialId) {
-        setBrochure(null);
-        setBookData(null);
-        return;
-      }
-
-      try {
-        const savedBrochure = await loadBrochureFromSupabase(memorialId);
-
-        if (!savedBrochure || cancelled) {
-          return;
-        }
-
-        setBrochure(savedBrochure);
-
-        const data = await getOrCreateCondolenceBook(savedBrochure.id);
-
-        if (!cancelled) {
-          setBookData(data);
-        }
-      } catch (error) {
-        console.error("Unable to load Book of Condolence:", error);
-
-        if (!cancelled) {
-          alert("Unable to load the Book of Condolence.");
-        }
-      }
+  if (!memorialId) {
+    if (!cancelled) {
+      setBrochure(null);
+      setBookData(null);
+      setLoading(false);
     }
+
+    return;
+  }
+
+  try {
+    const savedBrochure = await loadBrochureFromSupabase(memorialId);
+
+    if (cancelled) {
+      return;
+    }
+
+    if (!savedBrochure) {
+      setBrochure(null);
+      setBookData(null);
+      return;
+    }
+
+    setBrochure(savedBrochure);
+
+    const data = await getOrCreateCondolenceBook(savedBrochure.id);
+
+    if (!cancelled) {
+      setBookData(data);
+    }
+  } catch (error) {
+    console.error("Unable to load Book of Condolence:", error);
+
+    if (!cancelled) {
+      alert("Unable to load the Book of Condolence.");
+    }
+  } finally {
+    if (!cancelled) {
+      setLoading(false);
+    }
+  }
+}
 
     void hydratePage();
 
@@ -69,7 +85,7 @@ export default function CondolenceBooksPage() {
       cancelled = true;
     };
   }, [memorialId]);
-  
+
   const counts = useMemo(() => {
     if (!bookData) {
       return {
@@ -195,6 +211,18 @@ export default function CondolenceBooksPage() {
       console.error("Unable to review condolence entry:", error);
       alert("Unable to update this condolence message.");
     }
+  }
+
+  if (loading) {
+    return (
+      <section className="rounded-2xl border border-black/10 bg-white p-8 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-black/10 border-t-[#7A9B8E]" />
+
+          <p className="text-sm text-black/50">Loading Book of Condolence…</p>
+        </div>
+      </section>
+    );
   }
 
   if (!brochure || !bookData) {

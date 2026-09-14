@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+    --background: #f6f4f1;
+    --foreground: #2f2f2f;
+
+    --euloges-ivory: #f6f4f1;
+    --euloges-charcoal: #2f2f2f;
+    --euloges-gold: #c9a44c;
+    --euloges-sage: #7a9b8e;
+    --euloges-rose: #d8a7b1;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100%;
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+    transition:
+        background-color 150ms ease,
+        border-color 150ms ease,
+        opacity 150ms ease;
+}
+
+button {
+    cursor: pointer;
+}
+
+@media print {
+    body {
+        background: white;
+    }
+
+    .print-shell {
+        padding: 0 !important;
+        background: white !important;
+    }
+
+    .print-page {
+        border: 0 !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}

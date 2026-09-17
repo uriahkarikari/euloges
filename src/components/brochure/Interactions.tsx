@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import type { MemorialInteractions } from "@/types/interactions";
 import { useSearchParams } from "next/navigation";
@@ -33,23 +33,18 @@ export default function Interactions({
   onSubmitMessage,
   onShare,
 }: Props) {
-  const [composerOpen, setComposerOpen] = useState(false);
   const searchParams = useSearchParams();
   const action = searchParams.get("action");
 
+  const [composerOpen, setComposerOpen] = useState(
+    action === "tribute" || action === "condolence",
+  );
+  
   const approvedMessages = interactions.messages.filter(
     (item) => item.approved,
   );
 
-  useEffect(() => {
-    if (action === "tribute") {
-      openComposer("tribute");
-    }
-
-    if (action === "condolence") {
-      openComposer("condolence");
-    }
-  }, [action]);
+      
 
   function openComposer(type: MessageType) {
     setMessageType(type);

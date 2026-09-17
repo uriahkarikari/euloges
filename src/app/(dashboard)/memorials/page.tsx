@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -120,12 +122,18 @@ export default function MemorialsPage() {
               className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                  {" "}
                   {memorial.portraitUrl ? (
-                    <img
+                    <Image
                       src={memorial.portraitUrl}
                       alt={memorial.name || "Memorial portrait"}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="80px"
+                      unoptimized={memorial.portraitUrl.startsWith(
+                        "data:image/",
+                      )}
+                      className="object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">

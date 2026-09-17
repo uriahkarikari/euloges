@@ -1,83 +1,177 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+
+import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
+  const router = useRouter();
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setMessage("");
+    setErrorMessage("");
+
+    const trimmedName = fullName.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedName) {
+      setErrorMessage("Enter your full name.");
+      return;
+    }
+
+    if (!trimmedEmail) {
+      setErrorMessage("Enter your email address.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Your password must be at least 8 characters.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      const supabase = createClient();
+
+      const { data, error } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: {
+          data: {
+            full_name: trimmedName,
+          },
+          emailRedirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+            if (data.session) {
+              router.push("/");
+              router.refresh();
+              return;
+            }
+
+      setMessage(
+        "Account created. Check your email to confirm your account before signing in.",
+      );
+
+      setFullName("");
+      setEmail("");
+      setPassword("");
+    } catch (error) {
+      console.error("Unable to create account:", error);
+
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes("rate limit")
+      ) {
+        setErrorMessage(
+          "Too many email requests have been made. Please wait a while before trying again.",
+        );
+      } else if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("Unable to create your account.");
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-      <h1 className="text-2xl font-semibold text-gray-800 text-center">
+    <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
+      <h1 className="text-center text-2xl font-semibold text-gray-800">
         Create your Euloges account
       </h1>
 
-      <p className="text-sm text-gray-500 text-center mt-2">
+      <p className="mt-2 text-center text-sm text-gray-500">
         Begin preserving a life and its memories.
       </p>
 
-      <button
-        type="button"
-        className="w-full mt-6 flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50"
-      >
-        <img
-          src="https://www.svgrepo.com/show/475656/google-color.svg"
-          alt=""
-          className="w-5 h-5"
-        />
-
-        <span className="text-sm font-medium text-gray-700">
-          Sign up with Google
-        </span>
-      </button>
-
-      <div className="flex items-center gap-3 my-6">
-        <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-xs text-gray-400">OR</span>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div>
-
-      <form className="space-y-4">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Full name</label>
+          <label className="mb-1 block text-sm text-gray-600">Full name</label>
 
           <input
             type="text"
+            value={fullName}
+            onChange={(event) => setFullName(event.target.value)}
             placeholder="Your full name"
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
+            autoComplete="name"
+            required
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 mb-1">
+          <label className="mb-1 block text-sm text-gray-600">
             Email address
           </label>
 
           <input
             type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder="you@example.com"
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
+            autoComplete="email"
+            required
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-gray-600 mb-1">Password</label>
+          <label className="mb-1 block text-sm text-gray-600">Password</label>
 
           <input
             type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             placeholder="Create a password"
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
+            autoComplete="new-password"
+            required
+            minLength={8}
+            className="w-full rounded-lg border border-gray-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#7A9B8E]"
           />
         </div>
 
+        {errorMessage && (
+          <p className="text-sm leading-6 text-red-600">{errorMessage}</p>
+        )}
+
+        {message && (
+          <p className="text-sm leading-6 text-[#5F776E]">{message}</p>
+        )}
+
         <button
-          type="button"
-          className="w-full bg-[#2F2F2F] text-white py-2.5 rounded-lg hover:opacity-90"
+          type="submit"
+          disabled={submitting}
+          className="w-full rounded-lg bg-[#2F2F2F] py-2.5 text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Create account
+          {submitting ? "Creating account…" : "Create account"}
         </button>
       </form>
 
-      <p className="text-sm text-center text-gray-500 mt-6">
+      <p className="mt-6 text-center text-sm text-gray-500">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="text-gray-900 font-medium hover:underline"
+          className="font-medium text-gray-900 hover:underline"
         >
           Sign in
         </Link>

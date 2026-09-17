@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type Props = {
   name: string;
   dob: string;
@@ -52,12 +54,16 @@ export default function MemorialHeader({
         In Loving Memory
       </p>
 
-      <div className="mx-auto mt-5 flex h-40 w-40 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-sm">
+      <div className="relative mx-auto mt-5 flex h-40 w-40 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-white shadow-sm">
+        {" "}
         {portraitUrl ? (
-          <img
+          <Image
             src={portraitUrl}
             alt={name ? `${name} memorial portrait` : "Memorial portrait"}
-            className="h-full w-full object-cover"
+            fill
+            sizes="160px"
+            unoptimized={portraitUrl.startsWith("data:image/")}
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-[#EEEAE4]">

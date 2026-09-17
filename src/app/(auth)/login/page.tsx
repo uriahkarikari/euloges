@@ -62,7 +62,7 @@ export default function LoginPage() {
         Sign in to manage memorials and preserve memories.
       </p>
 
-      <button
+      {/* <button
         type="button"
         className="w-full mt-6 flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50"
       >
@@ -81,7 +81,7 @@ export default function LoginPage() {
         <div className="flex-1 h-px bg-gray-200" />
         <span className="text-xs text-gray-400">OR</span>
         <div className="flex-1 h-px bg-gray-200" />
-      </div>
+      </div> */}
 
       <form className="space-y-4" onSubmit={handleSignIn}>
         <div>

@@ -21,6 +21,11 @@ import type {
   BrochureSection,
 } from "@/types/brochure";
 
+import {
+  deleteMemorialPortrait,
+  uploadMemorialPortrait,
+} from "@/lib/portraitStorage";
+
 export default function CreateBrochurePage() {
   const searchParams = useSearchParams();
   const memorialToEdit = searchParams.get("memorial");
@@ -353,6 +358,109 @@ if (isCreatingNew && !hasMemorialContent) {
     router.push("/");
   }
 
+  async function handlePortraitRemoved() {
+    if (!portraitUrl) {
+      return;
+    }
+
+    const previousPortraitUrl = portraitUrl;
+
+    try {
+      /*
+       * Persist the memorial without a portrait first.
+       * This ensures the database no longer references
+       * the Storage object before we delete it.
+       */
+      const draftWithoutPortrait: BrochureDraft = {
+        ...buildCurrentDraft(),
+        portraitUrl: "",
+        updatedAt: new Date().toISOString(),
+      };
+
+      const saved = await persistBrochureDraft(draftWithoutPortrait);
+
+      setBrochureId(saved.id);
+      setPortraitUrl("");
+      setSavedAt(saved.updatedAt);
+
+      /*
+       * Now that the database no longer references the
+       * portrait, remove the actual Storage object.
+       *
+       * Legacy base64/external URLs are safely ignored.
+       */
+      try {
+        await deleteMemorialPortrait(previousPortraitUrl);
+      } catch (error) {
+        console.error(
+          "Unable to remove memorial portrait from Storage:",
+          error,
+        );
+      }
+    } catch (error) {
+      console.error("Unable to remove memorial portrait:", error);
+
+      alert("Unable to remove the photograph. Please try again.");
+    }
+  }
+
+  async function handlePortraitSelected(file: File) {
+    try {
+      /*
+       * Ensure this memorial has a real Supabase UUID
+       * before its portrait is uploaded.
+       */
+      const currentDraft = buildCurrentDraft();
+      const saved = await persistBrochureDraft(currentDraft);
+
+      if (saved.id !== brochureId) {
+        setBrochureId(saved.id);
+      }
+
+      const previousPortraitUrl = portraitUrl;
+
+      /*
+       * Store the actual image in Supabase Storage.
+       */
+      const uploadedUrl = await uploadMemorialPortrait(saved.id, file);
+
+      /*
+       * Immediately persist the Storage URL.
+       * Do not rely only on the debounced autosave.
+       */
+      const draftWithPortrait: BrochureDraft = {
+        ...saved,
+        portraitUrl: uploadedUrl,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const savedWithPortrait = await persistBrochureDraft(draftWithPortrait);
+
+      setBrochureId(savedWithPortrait.id);
+      setPortraitUrl(savedWithPortrait.portraitUrl);
+      setSavedAt(savedWithPortrait.updatedAt);
+
+      /*
+       * Only remove the previous portrait after both
+       * the new upload and database save succeeded.
+       *
+       * Legacy base64/external URLs are safely ignored
+       * by deleteMemorialPortrait().
+       */
+      if (previousPortraitUrl && previousPortraitUrl !== uploadedUrl) {
+        try {
+          await deleteMemorialPortrait(previousPortraitUrl);
+        } catch (error) {
+          console.error("Unable to remove previous memorial portrait:", error);
+        }
+      }
+    } catch (error) {
+      console.error("Unable to upload memorial portrait:", error);
+
+      alert("Unable to upload the photograph. Please try again.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <header>
@@ -408,7 +516,8 @@ if (isCreatingNew && !hasMemorialContent) {
         setDob={setDob}
         setDod={setDod}
         setBio={setBio}
-        setPortraitUrl={setPortraitUrl}
+        onPortraitSelected={handlePortraitSelected}
+        onPortraitRemoved={handlePortraitRemoved}
       />
 
       <SectionsBuilder sections={sections} setSections={setSections} />

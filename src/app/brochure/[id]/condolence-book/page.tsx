@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -12,7 +13,6 @@ import {
 
 import { loadBrochureFromSupabase } from "@/lib/brochureSupabase";
 
-import { loadBrochureDraft } from "@/lib/brochureStorage";
 
 import type { BrochureDraft } from "@/types/brochure";
 
@@ -164,16 +164,20 @@ useEffect(() => {
             Euloges
           </p>
 
-          <div className="mx-auto mt-5 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#EEEAE4] shadow-sm">
+          <div className="relative mx-auto mt-5 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#EEEAE4] shadow-sm">
+            {" "}
             {brochure.portraitUrl ? (
-              <img
+              <Image
                 src={brochure.portraitUrl}
                 alt={
                   brochure.name
                     ? `${brochure.name} memorial portrait`
                     : "Memorial portrait"
                 }
-                className="h-full w-full object-cover"
+                fill
+                sizes="144px"
+                unoptimized={brochure.portraitUrl.startsWith("data:image/")}
+                className="object-cover"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center">

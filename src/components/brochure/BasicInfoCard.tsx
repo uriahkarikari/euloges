@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 
 type Props = {
   name: string;
@@ -10,7 +11,8 @@ type Props = {
   setDob: (value: string) => void;
   setDod: (value: string) => void;
   setBio: (value: string) => void;
-  setPortraitUrl: (value: string) => void;
+  onPortraitSelected: (file: File) => void;
+  onPortraitRemoved: () => void;
 };
 
 export default function BasicInfoCard({
@@ -23,7 +25,8 @@ export default function BasicInfoCard({
   setDob,
   setDod,
   setBio,
-  setPortraitUrl,
+  onPortraitSelected,
+  onPortraitRemoved,
 }: Props) {
   function handlePortraitChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -44,21 +47,12 @@ export default function BasicInfoCard({
       return;
     }
 
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setPortraitUrl(reader.result);
-      }
-    };
-
-    reader.readAsDataURL(file);
+    onPortraitSelected(file);
   }
 
   function removePortrait() {
-    setPortraitUrl("");
+    onPortraitRemoved();
   }
-
   return (
     <section className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
       <div className="mb-6">
@@ -83,12 +77,15 @@ export default function BasicInfoCard({
           </label>
 
           <div className="flex flex-col gap-5 rounded-2xl border border-dashed border-black/15 bg-[#FAF9F7] p-5 sm:flex-row sm:items-center">
-            <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white">
+            <div className="relative flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-full border border-black/10 bg-white">
               {portraitUrl ? (
-                <img
+                <Image
                   src={portraitUrl}
                   alt={name ? `${name} memorial portrait` : "Memorial portrait"}
-                  className="h-full w-full object-cover"
+                  fill
+                  sizes="128px"
+                  unoptimized={portraitUrl.startsWith("data:image/")}
+                  className="object-cover"
                 />
               ) : (
                 <div className="px-4 text-center">

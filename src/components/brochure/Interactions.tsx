@@ -16,8 +16,11 @@ type Props = {
   setName: Dispatch<SetStateAction<string>>;
   setMessage: Dispatch<SetStateAction<string>>;
   setMessageType: Dispatch<SetStateAction<MessageType>>;
-  onLightCandle: () => void;
-  onSubmitMessage: () => void;
+  onLightCandle: () => Promise<void>;
+  onSubmitMessage: () => Promise<boolean>;
+  lightingCandle: boolean;
+  submittingMessage: boolean;
+  candleLit: boolean;
   onShare: () => void;
 };
 
@@ -32,6 +35,9 @@ export default function Interactions({
   onLightCandle,
   onSubmitMessage,
   onShare,
+  lightingCandle,
+  submittingMessage,
+  candleLit,
 }: Props) {
   const searchParams = useSearchParams();
   const action = searchParams.get("action");
@@ -39,12 +45,10 @@ export default function Interactions({
   const [composerOpen, setComposerOpen] = useState(
     action === "tribute" || action === "condolence",
   );
-  
+
   const approvedMessages = interactions.messages.filter(
     (item) => item.approved,
   );
-
-      
 
   function openComposer(type: MessageType) {
     setMessageType(type);
@@ -56,9 +60,12 @@ export default function Interactions({
     setMessage("");
   }
 
-  function submitMessage() {
-    onSubmitMessage();
-    setComposerOpen(false);
+  async function submitMessage() {
+    const submitted = await onSubmitMessage();
+
+    if (submitted) {
+      setComposerOpen(false);
+    }
   }
 
   return (
@@ -73,10 +80,18 @@ export default function Interactions({
           />
 
           <ActionButton
-            label="Candle"
+            label={
+              lightingCandle
+                ? "Updating..."
+                : candleLit
+                  ? "Candle lit"
+                  : "Candle"
+            }
             icon="candle"
             onClick={onLightCandle}
             count={interactions.candles.length}
+            disabled={lightingCandle}
+            active={candleLit}
           />
 
           <ActionButton
@@ -174,10 +189,10 @@ export default function Interactions({
               <button
                 type="button"
                 onClick={submitMessage}
-                disabled={!name.trim() || !message.trim()}
+                disabled={!name.trim() || !message.trim() || submittingMessage}
                 className="rounded-xl bg-[#2F2F2F] px-5 py-2.5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Submit
+                {submittingMessage ? "Submitting..." : "Submit"}
               </button>
             </div>
           </div>
@@ -221,9 +236,11 @@ export default function Interactions({
 type ActionButtonProps = {
   label: string;
   icon: "tribute" | "candle" | "condolence" | "share";
-  onClick: () => void;
+  onClick: () => void | Promise<void>;
   count?: number;
   iconOnly?: boolean;
+  disabled?: boolean;
+  active?: boolean;
 };
 
 function ActionButton({
@@ -232,17 +249,30 @@ function ActionButton({
   onClick,
   count,
   iconOnly = false,
+  disabled = false,
+  active = false,
 }: ActionButtonProps) {
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={label}
       title={label}
+      disabled={disabled}
+      aria-pressed={active}
       className={
         iconOnly
-          ? "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[#625B53] transition hover:bg-[#EEE8DE] hover:text-[#211F1B]"
-          : "flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm text-[#625B53] transition hover:bg-[#EEE8DE] hover:text-[#211F1B]"
+          ? `flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-40 ${
+              active
+                ? "bg-[#EEE8DE] text-[#211F1B]"
+                : "text-[#625B53] hover:bg-[#EEE8DE] hover:text-[#211F1B]"
+            }`
+          : `flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
+              active
+                ? "bg-[#EEE8DE] text-[#211F1B]"
+                : "text-[#625B53] hover:bg-[#EEE8DE] hover:text-[#211F1B]"
+            }`
       }
     >
       <ActionIcon

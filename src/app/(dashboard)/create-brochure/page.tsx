@@ -49,11 +49,13 @@ export default function CreateBrochurePage() {
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
 
   const [accessCode, setAccessCode] = useState("");
-
+const [publishing, setPublishing] = useState(false);
+const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [savedAt, setSavedAt] = useState("");
   const [loadingMemorial, setLoadingMemorial] = useState(
     Boolean(memorialToEdit),
+
   );
 
   useEffect(() => {
@@ -276,27 +278,35 @@ if (isCreatingNew && !hasMemorialContent) {
     }
   }
 
-  async function publishMemorial() {
-    const publicationTime = publishedAt ?? new Date().toISOString();
-
-    const publishedDraft = buildCurrentDraft("published", publicationTime);
-
-    try {
-      const saved = await persistBrochureDraft(publishedDraft);
-
-      if (saved.id !== brochureId) {
-        setBrochureId(saved.id);
-      }
-
-      setStatus("published");
-      setPublishedAt(saved.publishedAt ?? publicationTime);
-      setSavedAt(saved.updatedAt);
-    } catch (error) {
-      console.error("Unable to publish memorial:", error);
-
-      alert("Unable to publish the memorial. Please try again.");
-    }
+async function publishMemorial() {
+  if (!name.trim() || publishing) {
+    return;
   }
+
+  setPublishing(true);
+
+  const publicationTime = publishedAt ?? new Date().toISOString();
+
+  const publishedDraft = buildCurrentDraft("published", publicationTime);
+
+  try {
+    const saved = await persistBrochureDraft(publishedDraft);
+
+    if (saved.id !== brochureId) {
+      setBrochureId(saved.id);
+    }
+
+    setStatus("published");
+    setPublishedAt(saved.publishedAt ?? publicationTime);
+    setSavedAt(saved.updatedAt);
+  } catch (error) {
+    console.error("Unable to publish memorial:", error);
+
+    alert("Unable to publish the memorial. Please try again.");
+  } finally {
+    setPublishing(false);
+  }
+}
 
   function viewMemorial() {
     window.open(`/brochure/${brochureId}`, "_blank", "noopener,noreferrer");
@@ -340,11 +350,13 @@ if (isCreatingNew && !hasMemorialContent) {
       alert("The memorial link could not be copied.");
     }
   }
+function continueEditing() {
+  setEditingPublishedMemorial(true);
+}
 
-  function continueEditing() {
-    setStatus("draft");
-    setPublishedAt(null);
-  }
+function finishEditingPublishedMemorial() {
+  setEditingPublishedMemorial(false);
+}
 
   function openPrintVersion() {
     window.open(
@@ -602,10 +614,28 @@ if (isCreatingNew && !hasMemorialContent) {
               <button
                 type="button"
                 onClick={publishMemorial}
-                disabled={!name.trim()}
+                disabled={!name.trim() || publishing}
                 className="rounded-xl bg-[#2F2F2F] px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Publish Memorial
+                {publishing ? "Publishing..." : "Publish Memorial"}
+              </button>
+            </div>
+          ) : editingPublishedMemorial ? (
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={previewMemorial}
+                className="rounded-xl border border-black/15 px-5 py-3 text-sm font-medium text-[#2F2F2F] hover:bg-black/[0.03]"
+              >
+                Preview Changes
+              </button>
+
+              <button
+                type="button"
+                onClick={finishEditingPublishedMemorial}
+                className="rounded-xl bg-[#2F2F2F] px-5 py-3 text-sm font-medium text-white"
+              >
+                Finish Editing
               </button>
             </div>
           ) : (

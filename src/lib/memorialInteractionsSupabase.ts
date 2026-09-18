@@ -93,22 +93,56 @@ export async function loadMemorialInteractions(
   };
 }
 
-export async function lightMemorialCandle(memorialId: string): Promise<Candle> {
+export async function toggleMemorialCandle(
+  memorialId: string,
+): Promise<CandleToggleResult> {
   const supabase = createClient();
+  const visitorId = getCandleVisitorId();
 
-  const { data, error } = await supabase
-    .from("memorial_candles")
-    .insert({
-      memorial_id: memorialId,
-    })
-    .select()
-    .single();
+  const { data, error } = await supabase.rpc("toggle_memorial_candle", {
+    p_memorial_id: memorialId,
+    p_visitor_id: visitorId,
+  });
 
   if (error) {
     throw error;
   }
 
-  return mapCandle(data as CandleRow);
+  const result = data?.[0] as
+    | {
+        action: "lit" | "extinguished";
+        candle_id: string;
+      }
+    | undefined;
+
+  if (!result) {
+    throw new Error("Candle toggle returned no result.");
+  }
+
+  return {
+    action: result.action,
+    candleId: result.candle_id,
+  };
+}
+
+export async function hasVisitorLitCandle(
+  memorialId: string,
+): Promise<boolean> {
+  const supabase = createClient();
+  const visitorId = getCandleVisitorId();
+
+  const { data, error } = await supabase
+    .from("memorial_candles")
+    .select("id")
+    .eq("memorial_id", memorialId)
+    .eq("visitor_id", visitorId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data !== null;
 }
 
 export async function submitMemorialMessage(input: {
@@ -152,6 +186,27 @@ export async function approveMemorialMessage(
 
   return mapMessage(data as TributeRow);
 }
+
+const CANDLE_VISITOR_ID_KEY = "euloges_candle_visitor_id";
+
+function getCandleVisitorId(): string {
+  const existing = window.localStorage.getItem(CANDLE_VISITOR_ID_KEY);
+
+  if (existing) {
+    return existing;
+  }
+
+  const visitorId = crypto.randomUUID();
+
+  window.localStorage.setItem(CANDLE_VISITOR_ID_KEY, visitorId);
+
+  return visitorId;
+}
+
+export type CandleToggleResult = {
+  action: "lit" | "extinguished";
+  candleId: string;
+};
 
 export async function deleteMemorialMessage(messageId: string): Promise<void> {
   const supabase = createClient();

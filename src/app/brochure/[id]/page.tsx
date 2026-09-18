@@ -16,10 +16,11 @@ import {
   approveMemorialMessage,
   canModerateMemorial,
   deleteMemorialMessage,
-  lightMemorialCandle,
+  toggleMemorialCandle,
   loadMemorialInteractions,
   recordMemorialEvent,
   submitMemorialMessage,
+  hasVisitorLitCandle,
 } from "@/lib/memorialInteractionsSupabase";
 
 import { saveBrochureDraft } from "@/lib/brochureStorage";
@@ -33,6 +34,12 @@ import {
 import type { BrochureDraft } from "@/types/brochure";
 import type { MemorialInteractions } from "@/types/interactions";
 
+function isValidUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
 export default function PublicBrochurePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -43,7 +50,10 @@ export default function PublicBrochurePage() {
 
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
+  const [submittingMessage, setSubmittingMessage] = useState(false);
+  const [lightingCandle, setLightingCandle] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [candleLit, setCandleLit] = useState(false);
   const [canModerate, setCanModerate] = useState(false);
 
   const [interactions, setInteractions] = useState<MemorialInteractions>({
@@ -81,13 +91,27 @@ export default function PublicBrochurePage() {
     let cancelled = false;
 
     async function loadMemorial() {
+      if (!isValidUuid(id)) {
+        if (!cancelled) {
+          setBrochure(null);
+          setLoaded(true);
+          setLoading(false);
+        }
+
+        return;
+      }
       try {
-        const [saved, loadedInteractions, moderationAllowed] =
-          await Promise.all([
-            loadBrochureFromSupabase(id),
-            loadMemorialInteractions(id),
-            canModerateMemorial(id),
-          ]);
+        const [
+          saved,
+          loadedInteractions,
+          moderationAllowed,
+          visitorHasLitCandle,
+        ] = await Promise.all([
+          loadBrochureFromSupabase(id),
+          loadMemorialInteractions(id),
+          canModerateMemorial(id),
+          hasVisitorLitCandle(id),
+        ]);
 
         if (cancelled) {
           return;
@@ -113,6 +137,7 @@ export default function PublicBrochurePage() {
 
         setInteractions(loadedInteractions);
         setCanModerate(moderationAllowed);
+        setCandleLit(visitorHasLitCandle);
 
         if (!countedVisit.current && saved.status === "published") {
           countedVisit.current = true;
@@ -149,51 +174,81 @@ export default function PublicBrochurePage() {
     };
   }, [id, searchParams]);
 
-  async function lightCandle() {
-    if (!id) {
-      return;
-    }
+async function lightCandle() {
+  if (!id || lightingCandle) {
+    return;
+  }
 
-    try {
-      const candle = await lightMemorialCandle(id);
+  setLightingCandle(true);
+
+  try {
+    const result = await toggleMemorialCandle(id);
+
+    if (result.action === "lit") {
+      setCandleLit(true);
 
       setInteractions((current) => ({
         ...current,
-        candles: [...current.candles, candle],
+        candles: [
+          ...current.candles,
+          {
+            id: result.candleId,
+            createdAt: new Date().toISOString(),
+          },
+        ],
       }));
-    } catch (error) {
-      console.error("Unable to light candle:", error);
+    } else {
+      setCandleLit(false);
 
-      alert("Unable to light the candle. Please try again.");
+      setInteractions((current) => ({
+        ...current,
+        candles: current.candles.filter(
+          (candle) => candle.id !== result.candleId,
+        ),
+      }));
     }
+  } catch (error) {
+    console.error("Unable to toggle candle:", error);
+
+    alert("Unable to update the candle. Please try again.");
+  } finally {
+    setLightingCandle(false);
+  }
+}
+async function submitMessage(): Promise<boolean> {
+  if (!id || !name.trim() || !message.trim() || submittingMessage) {
+    return false;
   }
 
-  async function submitMessage() {
-    if (!id || !name.trim() || !message.trim()) {
-      return;
-    }
+  setSubmittingMessage(true);
 
-    try {
-      await submitMemorialMessage({
-        memorialId: id,
-        name,
-        message,
-        type: messageType,
-      });
+  try {
+    await submitMemorialMessage({
+      memorialId: id,
+      name,
+      message,
+      type: messageType,
+    });
 
-      setMessage("");
+    setMessage("");
 
-      alert(
-        messageType === "tribute"
-          ? "Your tribute has been submitted for review."
-          : "Your condolence has been submitted for review.",
-      );
-    } catch (error) {
-      console.error("Unable to submit message:", error);
+    alert(
+      messageType === "tribute"
+        ? "Your tribute has been submitted for review."
+        : "Your condolence has been submitted for review.",
+    );
 
-      alert("Unable to submit your message. Please try again.");
-    }
+    return true;
+  } catch (error) {
+    console.error("Unable to submit message:", error);
+
+    alert("Unable to submit your message. Please try again.");
+
+    return false;
+  } finally {
+    setSubmittingMessage(false);
   }
+}
 
 
   async function approveMessage(messageId: string) {
@@ -470,7 +525,10 @@ export default function PublicBrochurePage() {
           setMessage={setMessage}
           setMessageType={setMessageType}
           onLightCandle={lightCandle}
+          lightingCandle={lightingCandle}
+          submittingMessage={submittingMessage}
           onSubmitMessage={submitMessage}
+          candleLit={candleLit}
           onShare={() => {
             const memorialUrl = `${window.location.origin}/brochure/${id}`;
 

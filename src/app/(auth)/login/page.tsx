@@ -14,6 +14,36 @@ export default function LoginPage() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+ async function handleGoogleSignIn() {
+   setIsSigningIn(true);
+   setErrorMessage("");
+
+   try {
+     const supabase = createClient();
+
+     const { error } = await supabase.auth.signInWithOAuth({
+       provider: "google",
+       options: {
+         redirectTo: `${window.location.origin}/callback`,
+       },
+     });
+
+     if (error) {
+       throw error;
+     }
+   } catch (error) {
+     console.error("Google sign in failed:", error);
+
+     setErrorMessage(
+       error instanceof Error
+         ? error.message
+         : "Unable to sign in with Google. Please try again.",
+     );
+
+     setIsSigningIn(false);
+   }
+ } 
+
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -61,26 +91,41 @@ router.push("/");      router.refresh();
         Sign in to manage memorials and preserve memories.
       </p>
 
-      {/* <button
+      <button
         type="button"
-        className="w-full mt-6 flex items-center justify-center gap-3 border border-gray-200 py-2.5 rounded-lg hover:bg-gray-50"
+        onClick={handleGoogleSignIn}
+        disabled={isSigningIn}
+        className="mt-6 flex w-full items-center justify-center gap-3 rounded-lg border border-gray-200 py-2.5 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        <img
-          src="https://www.svgrepo.com/show/475656/google-color.svg"
-          alt=""
-          className="w-5 h-5"
-        />
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
+          <path
+            fill="#4285F4"
+            d="M21.6 12.23c0-.71-.06-1.4-.18-2.07H12v3.92h5.38a4.6 4.6 0 0 1-2 3.02v2.54h3.24c1.9-1.75 2.98-4.33 2.98-7.41Z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 22c2.7 0 4.97-.9 6.63-2.36l-3.24-2.54c-.9.6-2.05.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.62A10 10 0 0 0 12 22Z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M6.39 13.93A6.02 6.02 0 0 1 6.08 12c0-.67.11-1.32.31-1.93V7.45H3.04A10 10 0 0 0 2 12c0 1.61.38 3.14 1.04 4.55l3.35-2.62Z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.94c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.62 9.62 0 0 0 12 2a10 10 0 0 0-8.96 5.45l3.35 2.62C7.18 7.7 9.39 5.94 12 5.94Z"
+          />
+        </svg>
 
         <span className="text-sm font-medium text-gray-700">
-          Sign in with Google
+          Continue with Google
         </span>
       </button>
 
-      <div className="flex items-center gap-3 my-6">
-        <div className="flex-1 h-px bg-gray-200" />
+      <div className="my-6 flex items-center gap-3">
+        <div className="h-px flex-1 bg-gray-200" />
         <span className="text-xs text-gray-400">OR</span>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div> */}
+        <div className="h-px flex-1 bg-gray-200" />
+      </div>
 
       <form className="space-y-4" onSubmit={handleSignIn}>
         <div>

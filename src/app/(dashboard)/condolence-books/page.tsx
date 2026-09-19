@@ -30,6 +30,9 @@ export default function CondolenceBooksPage() {
   const memorialId = searchParams.get("memorial");
 
   const [showQrCode, setShowQrCode] = useState(false);
+  const [changingBookStatus, setChangingBookStatus] = useState(false);
+  const [reviewingEntryId, setReviewingEntryId] = useState<string | null>(null);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -112,9 +115,11 @@ async function hydratePage() {
   }
 
   async function handleOpenBook() {
-    if (!brochure) {
+    if (!brochure || changingBookStatus) {
       return;
     }
+
+    setChangingBookStatus(true);
 
     try {
       const updated = await openCondolenceBook(brochure.id);
@@ -122,13 +127,17 @@ async function hydratePage() {
     } catch (error) {
       console.error("Unable to open Book of Condolence:", error);
       alert("Unable to open the Book of Condolence.");
+    } finally {
+      setChangingBookStatus(false);
     }
   }
 
   async function handleCloseBook() {
-    if (!brochure) {
+    if (!brochure || changingBookStatus) {
       return;
     }
+
+    setChangingBookStatus(true);
 
     try {
       const updated = await closeCondolenceBook(brochure.id);
@@ -136,6 +145,8 @@ async function hydratePage() {
     } catch (error) {
       console.error("Unable to close Book of Condolence:", error);
       alert("Unable to close the Book of Condolence.");
+    } finally {
+      setChangingBookStatus(false);
     }
   }
 
@@ -195,9 +206,11 @@ async function hydratePage() {
     entryId: string,
     status: CondolenceEntryStatus,
   ) {
-    if (!brochure) {
+    if (!brochure || reviewingEntryId) {
       return;
     }
+
+    setReviewingEntryId(entryId);
 
     try {
       const updated = await updateCondolenceEntryStatus(
@@ -210,6 +223,8 @@ async function hydratePage() {
     } catch (error) {
       console.error("Unable to review condolence entry:", error);
       alert("Unable to update this condolence message.");
+    } finally {
+      setReviewingEntryId(null);
     }
   }
 
@@ -296,17 +311,19 @@ async function hydratePage() {
             <button
               type="button"
               onClick={handleCloseBook}
-              className="rounded-xl border border-black/15 px-5 py-3 text-sm font-medium text-[#2F2F2F]"
+              disabled={changingBookStatus}
+              className="rounded-xl border border-black/15 px-5 py-3 text-sm font-medium text-[#2F2F2F] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Close Book
+              {changingBookStatus ? "Closing..." : "Close Book"}
             </button>
           ) : (
             <button
               type="button"
               onClick={handleOpenBook}
-              className="rounded-xl bg-[#2F2F2F] px-5 py-3 text-sm font-medium text-white"
+              disabled={changingBookStatus}
+              className="rounded-xl bg-[#2F2F2F] px-5 py-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Open Book of Condolence
+              {changingBookStatus ? "Opening..." : "Open Book of Condolence"}
             </button>
           )}
         </div>
@@ -347,6 +364,7 @@ async function hydratePage() {
       </section>
 
       <section className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+        {" "}
         <div className="mb-5">
           <h2 className="text-lg font-semibold text-[#2F2F2F]">
             Pending Messages
@@ -356,7 +374,6 @@ async function hydratePage() {
             Approve or deny submissions before they appear publicly or in print.
           </p>
         </div>
-
         {bookData.entries.filter((entry) => entry.status === "pending")
           .length === 0 ? (
           <EmptyState text="No pending condolence messages." />
@@ -383,17 +400,21 @@ async function hydratePage() {
                     <button
                       type="button"
                       onClick={() => handleStatusChange(entry.id, "approved")}
-                      className="rounded-xl bg-[#7A9B8E] px-4 py-2 text-sm font-medium text-white"
+                      disabled={reviewingEntryId !== null}
+                      className="rounded-xl bg-[#7A9B8E] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Approve
+                      {reviewingEntryId === entry.id
+                        ? "Approving..."
+                        : "Approve"}
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleStatusChange(entry.id, "denied")}
-                      className="rounded-xl border border-black/15 px-4 py-2 text-sm font-medium text-black/60"
+                      disabled={reviewingEntryId !== null}
+                      className="rounded-xl border border-black/15 px-4 py-2 text-sm font-medium text-black/60 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Deny
+                      {reviewingEntryId === entry.id ? "Denying..." : "Deny"}
                     </button>
                   </div>
                 </article>

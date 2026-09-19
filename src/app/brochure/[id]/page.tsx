@@ -47,6 +47,7 @@ export default function PublicBrochurePage() {
   const id = params.id;
 
   const [loading, setLoading] = useState(true);
+  
 
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
@@ -72,10 +73,15 @@ export default function PublicBrochurePage() {
     "condolence",
   );
 
+  const [moderatingMessageId, setModeratingMessageId] = useState<string | null>(
+    null,
+  );
+
   const [authorized, setAuthorized] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const [accessError, setAccessError] = useState("");
   const [isPreview, setIsPreview] = useState(false);
+  
 
   const countedVisit = useRef(false);
 
@@ -252,6 +258,13 @@ async function submitMessage(): Promise<boolean> {
 
 
   async function approveMessage(messageId: string) {
+    if (moderatingMessageId) {
+      return;
+    }
+
+    setModeratingMessageId(messageId);
+    
+
     try {
       const approved = await approveMemorialMessage(messageId);
 
@@ -265,10 +278,19 @@ async function submitMessage(): Promise<boolean> {
       console.error("Unable to approve message:", error);
 
       alert("Unable to approve the message.");
+    } finally {
+      setModeratingMessageId(null);
     }
+    
   }
 
   async function deleteMessage(messageId: string) {
+    if (moderatingMessageId) {
+      return;
+    }
+
+    setModeratingMessageId(messageId);
+
     try {
       await deleteMemorialMessage(messageId);
 
@@ -280,6 +302,8 @@ async function submitMessage(): Promise<boolean> {
       console.error("Unable to delete message:", error);
 
       alert("Unable to delete the message.");
+    } finally {
+      setModeratingMessageId(null);
     }
   }
 
@@ -294,9 +318,7 @@ async function submitMessage(): Promise<boolean> {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#F6F4F1] px-6 py-16 text-center">
-        <p className="text-sm text-black/60">
-          Loading printable Book of Condolence...
-        </p>
+        <p className="text-sm text-black/60">Loading memorial... </p>
       </main>
     );
   }
@@ -593,18 +615,24 @@ async function submitMessage(): Promise<boolean> {
                         <button
                           type="button"
                           onClick={() => approveMessage(item.id)}
-                          className="rounded-lg bg-[#7A9B8E] px-3 py-1.5 text-xs text-white"
+                          disabled={moderatingMessageId !== null}
+                          className="rounded-lg bg-[#7A9B8E] px-3 py-1.5 text-xs text-white disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          Approve
+                          {moderatingMessageId === item.id
+                            ? "Approving..."
+                            : "Approve"}
                         </button>
                       )}
 
                       <button
                         type="button"
                         onClick={() => deleteMessage(item.id)}
-                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs hover:text-red-600"
+                        disabled={moderatingMessageId !== null}
+                        className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Delete
+                        {moderatingMessageId === item.id
+                          ? "Deleting..."
+                          : "Delete"}
                       </button>
                     </div>
                   </div>

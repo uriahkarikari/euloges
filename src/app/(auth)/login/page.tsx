@@ -37,8 +37,7 @@ export default function LoginPage() {
         throw error;
       }
 
-      router.push("/create-brochure");
-      router.refresh();
+router.push("/");      router.refresh();
     } catch (error) {
       console.error("Sign in failed:", error);
 

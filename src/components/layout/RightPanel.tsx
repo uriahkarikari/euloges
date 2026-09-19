@@ -1,40 +1,42 @@
 export default function RightPanel() {
   return (
     <aside className="sticky top-4 space-y-4">
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <p className="text-xs uppercase tracking-wide text-gray-400">
-          Legacy Assistant
+          Legacy Workspace
         </p>
 
         <h2 className="mt-2 font-semibold text-gray-800">
-          Build a complete remembrance
+          Preserve a life with care
         </h2>
 
+        <p className="mt-3 text-sm leading-6 text-gray-600">
+          Create and manage memorials, preserve stories and receive memories
+          from family, friends and community.
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-800">
+          Remembrance tools
+        </h3>
+
         <div className="mt-4 space-y-3 text-sm text-gray-600">
-          <p>✓ Add basic information</p>
-          <p>○ Add photographs</p>
-          <p>○ Create life timeline</p>
-          <p>○ Review funeral programme</p>
-          <p>○ Publish and share QR</p>
+          <p>🕯 Light a memorial candle</p>
+          <p>💬 Share tributes and condolences</p>
+          <p>📖 Create a Book of Condolence</p>
+          <p>▦ Share memorials by link or QR</p>
         </div>
       </section>
 
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <h3 className="font-semibold text-sm">Live & remembrance</h3>
+      <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+        <h3 className="text-sm font-semibold text-gray-800">
+          A living remembrance
+        </h3>
 
-        <div className="mt-4 space-y-3 text-sm text-gray-600">
-          <p>🕯 Memorial programmes</p>
-          <p>📖 Recent tributes</p>
-          <p>🌿 Community remembrance</p>
-        </div>
-      </section>
-
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <p className="text-xs text-gray-400">Future</p>
-
-        <p className="mt-2 text-sm text-gray-600">
-          Biography assistance, timeline generation and memorial-book creation
-          will live here.
+        <p className="mt-3 text-sm leading-6 text-gray-600">
+          A memorial can continue gathering stories and expressions of
+          remembrance after it has been published.
         </p>
       </section>
     </aside>

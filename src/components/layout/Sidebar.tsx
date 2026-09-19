@@ -87,7 +87,7 @@ export default function Sidebar() {
         </button> */}
       </nav>
 
-      <div className="mt-8 border-t border-gray-100 pt-5">
+      {/* <div className="mt-8 border-t border-gray-100 pt-5">
         <p className="text-xs uppercase tracking-wide text-gray-400">
           Memorial Progress
         </p>
@@ -104,7 +104,7 @@ export default function Sidebar() {
         </div>
 
         <p className="mt-2 text-xs text-gray-400">50% complete</p>
-      </div>
+      </div> */}
       <div className="mt-6 border-t border-gray-100 pt-5">
         <LogoutButton />
       </div>

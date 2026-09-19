@@ -81,6 +81,8 @@ export default function PublicBrochurePage() {
   const [inputCode, setInputCode] = useState("");
   const [accessError, setAccessError] = useState("");
   const [isPreview, setIsPreview] = useState(false);
+  const [savingPreviewDraft, setSavingPreviewDraft] = useState(false);
+  const [publishingFromPreview, setPublishingFromPreview] = useState(false);
   
 
   const countedVisit = useRef(false);
@@ -401,39 +403,45 @@ async function submitMessage(): Promise<boolean> {
   }
 
   async function publishFromPreview() {
-  if (!brochure) {
-    return;
-  }
-
-  const now = new Date().toISOString();
-
-  const publishedDraft: BrochureDraft = {
-    ...brochure,
-    status: "published",
-    publishedAt: brochure.publishedAt ?? now,
-    updatedAt: now,
-  };
-
-  try {
-    const saved = await saveBrochureToSupabase(publishedDraft);
-
-    saveBrochureDraft(saved);
-    setBrochure(saved);
-
-    window.history.replaceState({}, "", `/brochure/${saved.id}`);
-
-    setIsPreview(false);
-  } catch (error) {
-    console.error("Unable to publish memorial:", error);
-
-    alert("Unable to publish the memorial. Please try again.");
-  }
-}
-
-  async function saveDraftAndReturn() {
-    if (!brochure) {
+    if (!brochure || publishingFromPreview) {
       return;
     }
+
+    setPublishingFromPreview(true);
+
+    const now = new Date().toISOString();
+
+    const publishedDraft: BrochureDraft = {
+      ...brochure,
+      status: "published",
+      publishedAt: brochure.publishedAt ?? now,
+      updatedAt: now,
+    };
+
+    try {
+      const saved = await saveBrochureToSupabase(publishedDraft);
+
+      saveBrochureDraft(saved);
+      setBrochure(saved);
+
+      window.history.replaceState({}, "", `/brochure/${saved.id}`);
+
+      setIsPreview(false);
+    } catch (error) {
+      console.error("Unable to publish memorial:", error);
+
+      alert("Unable to publish the memorial. Please try again.");
+    } finally {
+      setPublishingFromPreview(false);
+    }
+  }
+
+  async function saveDraftAndReturn() {
+    if (!brochure || savingPreviewDraft) {
+      return;
+    }
+
+    setSavingPreviewDraft(true);
 
     const draft: BrochureDraft = {
       ...brochure,
@@ -447,11 +455,12 @@ async function submitMessage(): Promise<boolean> {
 
       saveBrochureDraft(saved);
 
-      router.push("/create-brochure");
+      router.push(`/create-brochure?memorial=${saved.id}`);
     } catch (error) {
       console.error("Unable to save draft:", error);
 
       alert("Unable to save the draft. Please try again.");
+      setSavingPreviewDraft(false);
     }
   }
 
@@ -475,17 +484,19 @@ async function submitMessage(): Promise<boolean> {
                 <button
                   type="button"
                   onClick={saveDraftAndReturn}
-                  className="rounded-xl border border-[#C9A44C]/40 bg-white px-4 py-2 text-sm font-medium text-[#7A6329]"
+                  disabled={savingPreviewDraft || publishingFromPreview}
+                  className="rounded-xl border border-[#C9A44C]/40 bg-white px-4 py-2 text-sm font-medium text-[#7A6329] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Save as Draft
+                  {savingPreviewDraft ? "Saving..." : "Save as Draft"}
                 </button>
 
                 <button
                   type="button"
                   onClick={publishFromPreview}
-                  className="rounded-xl bg-[#2F2F2F] px-4 py-2 text-sm font-medium text-white"
+                  disabled={publishingFromPreview || savingPreviewDraft}
+                  className="rounded-xl bg-[#2F2F2F] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Publish Memorial
+                  {publishingFromPreview ? "Publishing..." : "Publish Memorial"}
                 </button>
               </div>
             </div>

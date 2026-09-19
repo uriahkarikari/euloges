@@ -45,13 +45,17 @@ export async function loadHomeFeed(): Promise<HomeFeedItem[]> {
         message,
         message_type,
         created_at,
-        memorials (
-          name,
-          portrait_url
-        )
+        memorials!inner (
+        name,
+        portrait_url,
+        status,
+        privacy
+      )
       `,
     )
     .eq("approved", true)
+    .eq("memorials.status", "published")
+    .eq("memorials.privacy", "public")
     .order("created_at", { ascending: false })
     .limit(20);
 

@@ -15,8 +15,8 @@ export default function MemorialsPage() {
   const router = useRouter();
   const [memorials, setMemorials] = useState<MemorialListItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(""); 
-  
+  const [errorMessage, setErrorMessage] = useState("");
+ 
 
   function createNewMemorial() {
     router.push(`/create-brochure?new=${Date.now()}`);
@@ -123,7 +123,7 @@ export default function MemorialsPage() {
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-100">
-                  {" "}
+                 
                   {memorial.portraitUrl ? (
                     <Image
                       src={memorial.portraitUrl}
@@ -169,12 +169,14 @@ export default function MemorialsPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Link
-                    href={`/brochure/${memorial.id}`}
-                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    View
-                  </Link>
+                  {memorial.status === "published" && (
+                    <Link
+                      href={`/brochure/${memorial.id}`}
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-sm hover:bg-gray-50"
+                    >
+                      View
+                    </Link>
+                  )}
 
                   <Link
                     href={`/create-brochure?memorial=${memorial.id}`}

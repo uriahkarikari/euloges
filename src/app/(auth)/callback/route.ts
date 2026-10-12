@@ -29,5 +29,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/update-password", request.url));
   }
 
-  return NextResponse.redirect(new URL("/", request.url));
+  const safeNext =
+    next && next.startsWith("/") && !next.startsWith("//")
+      ? next
+      : "/workspace";
+
+  return NextResponse.redirect(new URL(safeNext, request.url));
 }

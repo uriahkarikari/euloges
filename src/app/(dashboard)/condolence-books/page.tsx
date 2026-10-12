@@ -1,8 +1,9 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 
 import {
@@ -13,6 +14,10 @@ import {
 } from "@/lib/condolenceBookRepository";
 
 import { loadBrochureFromSupabase } from "@/lib/brochureSupabase";
+import {
+  listUserMemorials,
+  type MemorialListItem,
+} from "@/lib/memorialRepository";
 
 import type {
   CondolenceBookData,
@@ -28,6 +33,13 @@ export default function CondolenceBooksPage() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const memorialId = searchParams.get("memorial");
+  const personName = searchParams.get("name")?.trim() ?? "";
+  const organisingAs = searchParams.get("organisingAs")?.trim() ?? "";
+  const router = useRouter();
+
+  const [memorials, setMemorials] = useState<MemorialListItem[]>([]);
+  const [memorialsLoading, setMemorialsLoading] = useState(true);
+  const [memorialsError, setMemorialsError] = useState("");
 
   const [showQrCode, setShowQrCode] = useState(false);
   const [changingBookStatus, setChangingBookStatus] = useState(false);
@@ -88,6 +100,45 @@ async function hydratePage() {
       cancelled = true;
     };
   }, [memorialId]);
+
+  useEffect(() => {
+    if (memorialId) {
+      setMemorialsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadMemorialChoices() {
+      setMemorialsLoading(true);
+      setMemorialsError("");
+
+      try {
+        const items = await listUserMemorials();
+
+        if (!cancelled) {
+          setMemorials(items);
+        }
+      } catch (error) {
+        console.error("Unable to load memorials for condolence books:", error);
+
+        if (!cancelled) {
+          setMemorialsError("Unable to load your memorials. Please try again.");
+        }
+      } finally {
+        if (!cancelled) {
+          setMemorialsLoading(false);
+        }
+      }
+    }
+
+    void loadMemorialChoices();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [memorialId]);
+
 
   const counts = useMemo(() => {
     if (!bookData) {
@@ -237,6 +288,106 @@ async function hydratePage() {
           <p className="text-sm text-black/50">Loading Book of Condolence…</p>
         </div>
       </section>
+    );
+  }
+
+  if (!memorialId) {
+    return (
+      <div className="space-y-5">
+        <section className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#987a58]">
+            Organise Remembrance
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold text-[#2F2F2F]">
+            {personName
+              ? `Open a Book of Condolence for ${personName}`
+              : "Open a Book of Condolence"}
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-black/55">
+            Select a memorial to manage its condolence messages, view and share
+            the book, generate its QR code, or print it.
+          </p>
+        </section>
+
+        {memorialsLoading ? (
+          <section className="rounded-2xl border border-black/10 bg-white p-6">
+            <p className="text-sm text-black/50">Loading your memorials…</p>
+          </section>
+        ) : memorialsError ? (
+          <section className="rounded-2xl border border-red-100 bg-red-50 p-6">
+            <p className="text-sm text-red-700">{memorialsError}</p>
+          </section>
+        ) : memorials.length === 0 ? (
+          <section className="rounded-2xl border border-black/10 bg-white p-8">
+            <h2 className="text-lg font-semibold text-[#2F2F2F]">
+              No memorials yet
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-black/55">
+              Create a memorial first. Once it is saved, you can open its Book
+              of Condolence and manage the messages.
+            </p>
+            <Link
+              href={`/create-brochure?new=1&next=condolence-book${personName ? `&name=${encodeURIComponent(personName)}` : ""}${organisingAs ? `&organisingAs=${encodeURIComponent(organisingAs)}` : ""}`}
+              className="mt-5 inline-flex rounded-xl bg-[#2F2F2F] px-4 py-3 text-sm font-medium text-white"
+            >
+              Create Memorial for Book of Condolence
+            </Link>
+          </section>
+        ) : (
+          <section className="space-y-3">
+            {memorials.map((memorial) => (
+              <article
+                key={memorial.id}
+                className="flex flex-col gap-4 rounded-2xl border border-black/10 bg-white p-5 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold text-[#2F2F2F]">
+                    {memorial.name || "Untitled Memorial"}
+                  </h2>
+                  <p className="mt-1 text-sm capitalize text-black/50">
+                    {memorial.status} · {memorial.privacy}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      `/condolence-books?memorial=${encodeURIComponent(memorial.id)}`,
+                    )
+                  }
+                  className="shrink-0 rounded-xl bg-[#7A9B8E] px-4 py-3 text-sm font-medium text-white"
+                >
+                  Open Book of Condolence
+                </button>
+              </article>
+            ))}
+          </section>
+        )}
+
+        {personName && (
+          <section className="rounded-2xl border border-dashed border-[#c9b9a5] bg-[#fffdf9] p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#987a58]">
+              Can't find this person?
+            </p>
+
+            <h2 className="mt-2 text-lg font-semibold text-[#2F2F2F]">
+              Create a memorial for {personName}
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-black/55">
+              If none of the existing memorials belongs to this person, create a
+              new memorial first. You can then open its Book of Condolence.
+            </p>
+
+            <Link
+              href={`/create-brochure?new=1&next=condolence-book&name=${encodeURIComponent(personName)}${organisingAs ? `&organisingAs=${encodeURIComponent(organisingAs)}` : ""}`}
+              className="mt-5 inline-flex rounded-xl bg-[#2F2F2F] px-4 py-3 text-sm font-medium text-white transition hover:bg-[#49433d]"
+            >
+              Create Memorial for {personName}
+            </Link>
+          </section>
+        )}
+      </div>
     );
   }
 

@@ -93,7 +93,7 @@ export default function SignupPage() {
       }
 
             if (data.session) {
-              router.push("/");
+              router.push("/workspace");
               router.refresh();
               return;
             }

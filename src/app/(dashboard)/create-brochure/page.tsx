@@ -31,6 +31,8 @@ export default function CreateBrochurePage() {
   const memorialToEdit = searchParams.get("memorial");
   const newMemorialRequest = searchParams.get("new");
   const isCreatingNew = Boolean(newMemorialRequest);
+  const nextDestination = searchParams.get("next");
+  const initialPersonName = searchParams.get("name")?.trim() ?? "";
   const [brochureId, setBrochureId] = useState("draft-001");
   const router = useRouter();
 
@@ -67,7 +69,7 @@ const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
           resetBrochurePersistenceState();
 
           setBrochureId(`draft-${newMemorialRequest ?? Date.now()}`);
-          setName("");
+          setName(initialPersonName);
           setDob("");
           setDod("");
           setBio("");
@@ -296,9 +298,16 @@ async function publishMemorial() {
       setBrochureId(saved.id);
     }
 
-    setStatus("published");
-    setPublishedAt(saved.publishedAt ?? publicationTime);
-    setSavedAt(saved.updatedAt);
+        setStatus("published");
+        setPublishedAt(saved.publishedAt ?? publicationTime);
+        setSavedAt(saved.updatedAt);
+
+        if (nextDestination === "condolence-book") {
+          router.push(
+            `/condolence-books?memorial=${encodeURIComponent(saved.id)}`,
+          );
+          return;
+        }
   } catch (error) {
     console.error("Unable to publish memorial:", error);
 
@@ -366,11 +375,35 @@ function finishEditingPublishedMemorial() {
     );
   }
 
-  function finishMemorial() {
-    router.push("/");
+  async function createBookOfCondolence() {
+    try {
+      const saved = await persistBrochureDraft(buildCurrentDraft());
+
+      if (!saved.id || saved.id.startsWith("draft-")) {
+        alert(
+          "The memorial has not been saved to the database yet. Please try again.",
+        );
+        return;
+      }
+
+      setBrochureId(saved.id);
+      setSavedAt(saved.updatedAt);
+
+      router.push(`/condolence-books?memorial=${encodeURIComponent(saved.id)}`);
+    } catch (error) {
+      console.error(
+        "Unable to save memorial before opening condolence book:",
+        error,
+      );
+      alert("Unable to save the memorial. Please try again.");
+    }
   }
 
-  async function handlePortraitRemoved() {
+  function finishMemorial() {
+    router.push("/workspace");
+  }
+
+   async function handlePortraitRemoved() {
     if (!portraitUrl) {
       return;
     }
@@ -708,13 +741,21 @@ function finishEditingPublishedMemorial() {
                 </button>
               </div>
 
-              <div className="flex justify-end border-t border-black/10 pt-4">
+              <div className="flex flex-col-reverse gap-3 border-t border-black/10 pt-4 sm:flex-row sm:justify-between">
                 <button
                   type="button"
                   onClick={finishMemorial}
-                  className="rounded-xl bg-[#7A9B8E] px-5 py-3 text-sm font-medium text-white"
+                  className="rounded-xl border border-black/15 px-5 py-3 text-sm font-medium text-[#2F2F2F]"
                 >
                   Done
+                </button>
+
+                <button
+                  type="button"
+                  onClick={createBookOfCondolence}
+                  className="rounded-xl bg-[#7A9B8E] px-5 py-3 text-sm font-medium text-white"
+                >
+                  Create Book of Condolence
                 </button>
               </div>
             </div>

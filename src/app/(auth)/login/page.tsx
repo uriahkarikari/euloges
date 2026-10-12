@@ -44,6 +44,7 @@ export default function LoginPage() {
    }
  } 
 
+
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -67,7 +68,8 @@ export default function LoginPage() {
         throw error;
       }
 
-router.push("/");      router.refresh();
+      router.push("/workspace");
+      router.refresh();
     } catch (error) {
       console.error("Sign in failed:", error);
 
@@ -80,6 +82,7 @@ router.push("/");      router.refresh();
       setIsSigningIn(false);
     }
   }
+
 
   return (
     <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-gray-100">

@@ -22,7 +22,7 @@ export default function MobileNav() {
   return (
     <div className="lg:hidden">
       <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-        <Link href="/" onClick={closeMenu}>
+        <Link href="/workspace" onClick={closeMenu}>
           <span className="text-xl font-semibold text-[#2F2F2F]">Euloges</span>
         </Link>
 
@@ -44,7 +44,7 @@ export default function MobileNav() {
         >
           <div className="space-y-1 text-sm">
             <Link
-              href="/"
+              href="/workspace"
               onClick={closeMenu}
               className="block rounded-lg px-3 py-2.5 hover:bg-gray-50"
             >
@@ -68,7 +68,7 @@ export default function MobileNav() {
             </Link>
 
             <Link
-              href="/memorials"
+              href="/condolence-books"
               onClick={closeMenu}
               className="block rounded-lg px-3 py-2.5 hover:bg-gray-50"
             >

@@ -79,6 +79,13 @@ export default function Sidebar() {
           Analytics
         </Link>
 
+        <Link
+          href="/legacy"
+          className="block rounded-lg px-3 py-2.5 hover:bg-gray-50"
+        >
+          Legacy
+        </Link>
+
         {/* <button
           type="button"
           className="w-full rounded-lg px-3 py-2.5 text-left hover:bg-gray-50"

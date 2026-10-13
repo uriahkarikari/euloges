@@ -82,6 +82,13 @@ export default function MobileNav() {
             >
               Analytics
             </Link>
+            <Link
+              href="/legacy"
+              onClick={closeMenu}
+              className="block rounded-lg px-3 py-2.5 hover:bg-gray-50"
+            >
+              Legacy
+            </Link>
 
             <div className="mt-3 border-t border-gray-100 pt-3">
               <LogoutButton />

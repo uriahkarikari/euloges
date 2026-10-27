@@ -3,18 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
-import { loadBrochureDraft, saveBrochureDraft } from "@/lib/brochureStorage";
 import {
+  getOrCreateCreationRequestId,
+  loadBrochureDraft,
+  loadBrochureDraftForSession,
+  saveBrochureDraft,
+  saveBrochureDraftForSession,
+} from "@/lib/brochureStorage";
+
+import {
+  activateBrochurePersistence,
   persistBrochureDraft,
-  resetBrochurePersistenceState,
 } from "@/lib/brochurePersistence";
 
 import BasicInfoCard from "@/components/brochure/BasicInfoCard";
 import BrochurePreview from "@/components/brochure/BrochurePreview";
 import SectionsBuilder from "@/components/brochure/SectionsBuilder";
 import { loadBrochureFromSupabase } from "@/lib/brochureSupabase";
-
-
 import type {
   BrochureDraft,
   BrochurePrivacy,
@@ -30,7 +35,15 @@ export default function CreateBrochurePage() {
   const searchParams = useSearchParams();
   const memorialToEdit = searchParams.get("memorial");
   const newMemorialRequest = searchParams.get("new");
+  const persistenceSessionKey = memorialToEdit
+    ? `memorial:${memorialToEdit}`
+    : newMemorialRequest
+      ? `new:${newMemorialRequest}`
+      : "recovery";
   const isCreatingNew = Boolean(newMemorialRequest);
+  const [creationRequestId, setCreationRequestId] = useState<
+    string | undefined
+  >(undefined);
   const [brochureId, setBrochureId] = useState("draft-001");
   const router = useRouter();
 
@@ -49,8 +62,25 @@ export default function CreateBrochurePage() {
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
 
   const [accessCode, setAccessCode] = useState("");
-const [publishing, setPublishing] = useState(false);
-const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [editingPublishedMemorial, setEditingPublishedMemorial] =
+    useState(false);
+
+    function canPersistMemorial(): boolean {
+    if (
+      !memorialToEdit &&
+      (isCreatingNew || brochureId.startsWith("draft-")) &&
+      !creationRequestId
+    ) {
+      alert(
+        "Memorial recovery could not be prepared. Please check your browser storage settings and try again.",
+      );
+      return false;
+    }
+
+    return true;
+  }
+
   const [hydrated, setHydrated] = useState(false);
   const [savedAt, setSavedAt] = useState("");
   const [loadingMemorial, setLoadingMemorial] = useState(
@@ -59,25 +89,62 @@ const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
   );
 
   useEffect(() => {
+    if (memorialToEdit) {
+      setCreationRequestId(undefined);
+      return;
+    }
+
+    if (isCreatingNew || persistenceSessionKey === "recovery") {
+      try {
+        setCreationRequestId(
+          getOrCreateCreationRequestId(persistenceSessionKey),
+        );
+      } catch (error) {
+        console.error("Unable to prepare memorial creation:", error);
+        setCreationRequestId(undefined);
+      }
+      return;
+    }
+
+    setCreationRequestId(undefined);
+  }, [memorialToEdit, isCreatingNew, persistenceSessionKey]);
+
+  useEffect(() => {
+    activateBrochurePersistence(persistenceSessionKey);
     let cancelled = false;
 
     async function hydrateBrochure() {
       try {
         if (isCreatingNew) {
-          resetBrochurePersistenceState();
+          const saved = loadBrochureDraftForSession(persistenceSessionKey);
 
-          setBrochureId(`draft-${newMemorialRequest ?? Date.now()}`);
-          setName("");
-          setDob("");
-          setDod("");
-          setBio("");
-          setPortraitUrl("");
-          setSections([]);
-          setPrivacy("public");
-          setAccessCode("");
-          setStatus("draft");
-          setPublishedAt(null);
-          setSavedAt("");
+          if (saved && !cancelled) {
+            setBrochureId(saved.id);
+            setName(saved.name);
+            setDob(saved.dob);
+            setDod(saved.dod);
+            setBio(saved.bio);
+            setPortraitUrl(saved.portraitUrl);
+            setSections(saved.sections ?? []);
+            setPrivacy(saved.privacy);
+            setAccessCode(saved.accessCode);
+            setStatus(saved.status);
+            setPublishedAt(saved.publishedAt);
+            setSavedAt(saved.updatedAt);
+          } else if (!cancelled) {
+            setBrochureId(`draft-${newMemorialRequest}`);
+            setName("");
+            setDob("");
+            setDod("");
+            setBio("");
+            setPortraitUrl("");
+            setSections([]);
+            setPrivacy("public");
+            setAccessCode("");
+            setStatus("draft");
+            setPublishedAt(null);
+            setSavedAt("");
+          }
 
           return;
         }
@@ -106,7 +173,9 @@ const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
           return;
         }
 
-        const saved = loadBrochureDraft();
+        const saved =
+          loadBrochureDraftForSession(persistenceSessionKey) ??
+          loadBrochureDraft();
 
         if (saved && !cancelled) {
           setBrochureId(saved.id);
@@ -121,6 +190,10 @@ const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
           setStatus(saved.status);
           setPublishedAt(saved.publishedAt);
           setSavedAt(saved.updatedAt);
+
+          // Keep the recovered draft available in both storage formats.
+          saveBrochureDraftForSession(persistenceSessionKey, saved);
+          saveBrochureDraft(saved);
         }
       } catch (error) {
         console.error("Unable to load memorial:", error);
@@ -141,10 +214,21 @@ const [editingPublishedMemorial, setEditingPublishedMemorial] = useState(false);
     return () => {
       cancelled = true;
     };
-  }, [memorialToEdit, isCreatingNew, newMemorialRequest]);
+  }, [
+    memorialToEdit,
+    isCreatingNew,
+    newMemorialRequest,
+    persistenceSessionKey,
+  ]);
 
  useEffect(() => {
-   if (!hydrated || loadingMemorial) {
+   if (
+     !hydrated ||
+     loadingMemorial ||
+     (!memorialToEdit &&
+       (isCreatingNew || brochureId.startsWith("draft-")) &&
+       !creationRequestId)
+   ) {
      return;
    }
 
@@ -180,7 +264,11 @@ if (isCreatingNew && !hasMemorialContent) {
      };
 
      try {
-       const saved = await persistBrochureDraft(draft);
+       const saved = await persistBrochureDraft(
+         draft,
+         persistenceSessionKey,
+         creationRequestId,
+       );
 
        if (cancelled) {
          return;
@@ -200,16 +288,10 @@ if (isCreatingNew && !hasMemorialContent) {
        setSavedAt(saved.updatedAt);
      } catch (error) {
        /*
-        * persistBrochureDraft already saved the current
-        * version to localStorage before attempting Supabase.
-        * Therefore a network/backend failure does not lose
-        * the user's current work.
+        * The local recovery copy may still be available,
+        * but the remote save failed.
         */
        console.error("Supabase autosave failed:", error);
-
-       if (!cancelled) {
-         setSavedAt(draft.updatedAt);
-       }
      }
    }, 300);
 
@@ -232,6 +314,8 @@ if (isCreatingNew && !hasMemorialContent) {
    hydrated,
    loadingMemorial,
    isCreatingNew,
+   creationRequestId,
+   persistenceSessionKey,
  ]);
 
   function buildCurrentDraft(
@@ -255,11 +339,14 @@ if (isCreatingNew && !hasMemorialContent) {
   }
 
   async function previewMemorial() {
+    if (!canPersistMemorial()) return;
     const draft = buildCurrentDraft();
-
     try {
-      const saved = await persistBrochureDraft(draft);
-
+      const saved = await persistBrochureDraft(
+        draft,
+      persistenceSessionKey,
+      creationRequestId,
+    );
       if (saved.id !== brochureId) {
         setBrochureId(saved.id);
       }
@@ -278,19 +365,23 @@ if (isCreatingNew && !hasMemorialContent) {
     }
   }
 
-async function publishMemorial() {
-  if (!name.trim() || publishing) {
-    return;
-  }
+  async function publishMemorial() {
+    if (!name.trim() || publishing) {
+      return;
+    }
+    if (!canPersistMemorial()) return;
+    setPublishing(true);
 
-  setPublishing(true);
+    const publicationTime = publishedAt ?? new Date().toISOString();
 
-  const publicationTime = publishedAt ?? new Date().toISOString();
-
-  const publishedDraft = buildCurrentDraft("published", publicationTime);
+    const publishedDraft = buildCurrentDraft("published", publicationTime);
 
   try {
-    const saved = await persistBrochureDraft(publishedDraft);
+    const saved = await persistBrochureDraft(
+      publishedDraft,
+      persistenceSessionKey,
+      creationRequestId,
+    );
 
     if (saved.id !== brochureId) {
       setBrochureId(saved.id);
@@ -374,6 +465,7 @@ function finishEditingPublishedMemorial() {
     if (!portraitUrl) {
       return;
     }
+    if (!canPersistMemorial()) return;
 
     const previousPortraitUrl = portraitUrl;
 
@@ -389,7 +481,11 @@ function finishEditingPublishedMemorial() {
         updatedAt: new Date().toISOString(),
       };
 
-      const saved = await persistBrochureDraft(draftWithoutPortrait);
+      const saved = await persistBrochureDraft(
+        draftWithoutPortrait,
+        persistenceSessionKey,
+        creationRequestId,
+      );
 
       setBrochureId(saved.id);
       setPortraitUrl("");
@@ -417,13 +513,18 @@ function finishEditingPublishedMemorial() {
   }
 
   async function handlePortraitSelected(file: File) {
+    if (!canPersistMemorial()) return;
     try {
       /*
        * Ensure this memorial has a real Supabase UUID
        * before its portrait is uploaded.
        */
       const currentDraft = buildCurrentDraft();
-      const saved = await persistBrochureDraft(currentDraft);
+      const saved = await persistBrochureDraft(
+        currentDraft,
+        persistenceSessionKey,
+        creationRequestId,
+      );
 
       if (saved.id !== brochureId) {
         setBrochureId(saved.id);
@@ -446,7 +547,11 @@ function finishEditingPublishedMemorial() {
         updatedAt: new Date().toISOString(),
       };
 
-      const savedWithPortrait = await persistBrochureDraft(draftWithPortrait);
+      const savedWithPortrait = await persistBrochureDraft(
+        draftWithPortrait,
+        persistenceSessionKey,
+        creationRequestId,
+      );
 
       setBrochureId(savedWithPortrait.id);
       setPortraitUrl(savedWithPortrait.portraitUrl);

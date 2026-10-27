@@ -61,8 +61,10 @@ function mapMemorialToBrochure(
   };
 }
 
+
 export async function createBrochureInSupabase(
   draft: BrochureDraft,
+  creationRequestId: string,
 ): Promise<BrochureDraft> {
   const supabase = createClient();
 
@@ -79,52 +81,41 @@ export async function createBrochureInSupabase(
     throw new Error("You must be signed in to create a memorial.");
   }
 
-  const { data: memorial, error: memorialError } = await supabase
-    .from("memorials")
-    .insert({
-      owner_id: user.id,
-      name: draft.name.trim() || "Untitled Memorial",
-      date_of_birth: draft.dob || null,
-      date_of_death: draft.dod || null,
-      biography: draft.bio.trim() || null,
-      portrait_url: draft.portraitUrl || null,
-      privacy: draft.privacy,
-      family_access_code: draft.accessCode || null,
-      status: draft.status,
-      published_at: draft.publishedAt,
-      updated_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  const { data: memorialId, error: creationError } = await supabase.rpc(
+    "create_memorial_idempotently",
+    {
+      p_creation_request_id: creationRequestId,
+      p_name: draft.name.trim() || "Untitled Memorial",
+      p_date_of_birth: draft.dob || null,
+      p_date_of_death: draft.dod || null,
+      p_biography: draft.bio.trim() || null,
+      p_portrait_url: draft.portraitUrl || null,
+      p_privacy: draft.privacy,
+      p_family_access_code: draft.accessCode || null,
+      p_status: draft.status,
+      p_published_at: draft.publishedAt,
+      p_sections: draft.sections.map((section) => ({
+        title: section.title,
+        content: section.content,
+      })),
+    },
+  );
 
-  if (memorialError) {
-    throw memorialError;
+  if (creationError) {
+    throw creationError;
   }
 
-  const sectionRows = draft.sections.map((section, position) => ({
-    memorial_id: memorial.id,
-    title: section.title,
-    content: section.content,
-    position,
-  }));
-
-  if (sectionRows.length > 0) {
-    const { error: sectionError } = await supabase
-      .from("memorial_sections")
-      .insert(sectionRows);
-
-    if (sectionError) {
-      throw sectionError;
-    }
+  if (typeof memorialId !== "string" || !memorialId) {
+    throw new Error("Memorial creation returned no memorial ID.");
   }
 
-  return loadBrochureFromSupabase(memorial.id).then((result) => {
-    if (!result) {
-      throw new Error("Created memorial could not be reloaded.");
-    }
+  const saved = await loadBrochureFromSupabase(memorialId);
 
-    return result;
-  });
+  if (!saved) {
+    throw new Error("Created memorial could not be reloaded.");
+  }
+
+  return saved;
 }
 
 export async function loadBrochureFromSupabase(
@@ -164,86 +155,38 @@ export async function loadBrochureFromSupabase(
   );
 }
 
+
 export async function saveBrochureToSupabase(
   draft: BrochureDraft,
 ): Promise<BrochureDraft> {
   const supabase = createClient();
 
-  const now = new Date().toISOString();
+  const { error } = await supabase.rpc("save_memorial_atomically", {
+    p_memorial_id: draft.id,
+    p_name: draft.name.trim() || "Untitled Memorial",
+    p_date_of_birth: draft.dob || null,
+    p_date_of_death: draft.dod || null,
+    p_biography: draft.bio.trim() || null,
+    p_portrait_url: draft.portraitUrl || null,
+    p_privacy: draft.privacy,
+    p_family_access_code: draft.accessCode || null,
+    p_status: draft.status,
+    p_published_at: draft.publishedAt,
+    p_sections: draft.sections.map((section) => ({
+      title: section.title,
+      content: section.content,
+    })),
+  });
 
-  const { data: memorial, error: memorialError } = await supabase
-    .from("memorials")
-    .update({
-      name: draft.name.trim() || "Untitled Memorial",
-      date_of_birth: draft.dob || null,
-      date_of_death: draft.dod || null,
-      biography: draft.bio.trim() || null,
-      portrait_url: draft.portraitUrl || null,
-      privacy: draft.privacy,
-      family_access_code: draft.accessCode || null,
-      status: draft.status,
-      published_at: draft.publishedAt,
-      updated_at: now,
-    })
-    .eq("id", draft.id)
-    .select()
-    .single();
-
-  if (memorialError) {
-    throw memorialError;
+  if (error) {
+    throw error;
   }
 
-  await replaceBrochureSections(draft.id, draft.sections);
+  const saved = await loadBrochureFromSupabase(draft.id);
 
-  const { data: sections, error: sectionsError } = await supabase
-    .from("memorial_sections")
-    .select("*")
-    .eq("memorial_id", draft.id)
-    .order("position", {
-      ascending: true,
-    });
-
-  if (sectionsError) {
-    throw sectionsError;
+  if (!saved) {
+    throw new Error("Saved memorial could not be reloaded.");
   }
 
-  return mapMemorialToBrochure(
-    memorial as MemorialRow,
-    (sections ?? []) as MemorialSectionRow[],
-  );
-}
-
-async function replaceBrochureSections(
-  memorialId: string,
-  sections: BrochureSection[],
-) {
-  const supabase = createClient();
-
-  const { error: deleteError } = await supabase
-    .from("memorial_sections")
-    .delete()
-    .eq("memorial_id", memorialId);
-
-  if (deleteError) {
-    throw deleteError;
-  }
-
-  if (sections.length === 0) {
-    return;
-  }
-
-  const rows = sections.map((section, position) => ({
-    memorial_id: memorialId,
-    title: section.title,
-    content: section.content,
-    position,
-  }));
-
-  const { error: insertError } = await supabase
-    .from("memorial_sections")
-    .insert(rows);
-
-  if (insertError) {
-    throw insertError;
-  }
+  return saved;
 }

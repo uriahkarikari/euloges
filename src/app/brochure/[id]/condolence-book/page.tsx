@@ -231,10 +231,46 @@ useEffect(() => {
             </div>
 
             {submitted && (
-              <div className="mt-5 rounded-2xl border border-[#7A9B8E]/20 bg-[#7A9B8E]/10 p-4">
-                <p className="text-sm font-medium text-[#567568]">
-                  Thank you. Your condolence has been submitted for review.
-                </p>
+              <div
+                role="status"
+                aria-live="polite"
+                className="mt-6 overflow-hidden rounded-2xl border border-[#7A9B8E]/30 bg-[#F4F8F5] shadow-sm"
+              >
+                <div className="flex items-start gap-4 p-5 sm:p-6">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#7A9B8E]/15 text-[#567568]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="h-6 w-6"
+                      aria-hidden="true"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m5 12 4 4L19 6"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="text-base font-semibold text-[#2F463B]">
+                      Thank you for your kindness
+                    </h3>
+
+                    <p className="mt-2 text-sm leading-6 text-[#52675A]">
+                      Your message has been received and submitted to the family
+                      for review. Your words of comfort are deeply appreciated.
+                    </p>
+
+                    <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#567568] ring-1 ring-[#7A9B8E]/20">
+                      <span className="h-2 w-2 rounded-full bg-[#7A9B8E]" />
+                      Submitted · Awaiting review
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

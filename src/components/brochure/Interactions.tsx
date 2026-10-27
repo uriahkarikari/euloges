@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 import type { MemorialInteractions } from "@/types/interactions";
 import { useSearchParams } from "next/navigation";
@@ -22,6 +22,12 @@ type Props = {
   submittingMessage: boolean;
   candleLit: boolean;
   onShare: () => void;
+  messageNotice: {
+    type: "success" | "error";
+    messageType?: "condolence" | "tribute";
+    text: string;
+  } | null;
+  onDismissNotice: () => void;
 };
 
 export default function Interactions({
@@ -29,6 +35,8 @@ export default function Interactions({
   name,
   message,
   messageType,
+  messageNotice,
+  onDismissNotice,
   setName,
   setMessage,
   setMessageType,
@@ -67,6 +75,19 @@ export default function Interactions({
       setComposerOpen(false);
     }
   }
+useEffect(() => {
+  if (!messageNotice || messageNotice.type !== "success") {
+    return;
+  }
+
+  const timeoutId = window.setTimeout(() => {
+    onDismissNotice();
+  }, 5000);
+
+  return () => {
+    window.clearTimeout(timeoutId);
+  };
+}, [messageNotice, onDismissNotice]);
 
   return (
     <section className="space-y-6">
@@ -104,6 +125,92 @@ export default function Interactions({
           <ActionButton label="Share" icon="share" iconOnly onClick={onShare} />
         </div>
       </div>
+
+      {messageNotice && (
+        <div
+          role="status"
+
+    aria-live="polite"
+          className={`rounded-2xl border p-5 shadow-sm sm:p-6 ${
+            messageNotice.type === "success"
+              ? "border-[#7A9B8E]/30 bg-[#F4F8F5]"
+              : "border-red-200 bg-red-50"
+          }`}
+        >
+          <div className="flex items-start gap-4">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                messageNotice.type === "success"
+                  ? "bg-[#7A9B8E]/15 text-[#567568]"
+                  : "bg-red-100 text-red-700"
+              }`}
+              aria-hidden="true"
+            >
+              {messageNotice.type === "success" ? (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="h-6 w-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m5 12 4 4L19 6"
+                  />
+                </svg>
+              ) : (
+                <span className="text-xl">!</span>
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <h3
+                className={`font-semibold ${
+                  messageNotice.type === "success"
+                    ? "text-[#2F463B]"
+                    : "text-red-800"
+                }`}
+              >
+                {messageNotice.type === "error"
+  ? messageNotice.messageType
+    ? "Your message wasn't sent"
+    : "Something went wrong"
+  : messageNotice.messageType
+    ? "Thank you for your kindness"
+    : "Link copied"}
+              </h3>
+
+              <p
+                className={`mt-2 text-sm leading-6 ${
+                  messageNotice.type === "success"
+                    ? "text-[#52675A]"
+                    : "text-red-700"
+                }`}
+              >
+                {messageNotice.text}
+              </p>
+
+              {messageNotice.type === "success" &&
+  messageNotice.messageType && (
+    <span className="mt-4 inline-flex rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#567568] ring-1 ring-[#7A9B8E]/20">
+      Submitted · Awaiting review
+    </span>
+  )}
+            </div>
+
+            <button
+              type="button"
+              onClick={onDismissNotice}
+              aria-label="Dismiss message"
+              className="rounded-full px-2 py-1 text-sm text-black/45 hover:bg-black/5"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {composerOpen && (
         <div className="rounded-2xl border border-black/10 bg-white p-6 shadow-sm">

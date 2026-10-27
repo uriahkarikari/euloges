@@ -52,6 +52,11 @@ export default function PublicBrochurePage() {
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
   const [submittingMessage, setSubmittingMessage] = useState(false);
+  const [messageNotice, setMessageNotice] = useState<{
+    type: "success" | "error";
+    messageType?: "condolence" | "tribute";
+    text: string;
+  } | null>(null);
   const [lightingCandle, setLightingCandle] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [candleLit, setCandleLit] = useState(false);
@@ -223,34 +228,44 @@ async function lightCandle() {
     setLightingCandle(false);
   }
 }
+
 async function submitMessage(): Promise<boolean> {
   if (!id || !name.trim() || !message.trim() || submittingMessage) {
     return false;
   }
 
+  const submittedType = messageType;
+
   setSubmittingMessage(true);
+  setMessageNotice(null);
 
   try {
     await submitMemorialMessage({
       memorialId: id,
       name,
       message,
-      type: messageType,
+      type: submittedType,
     });
 
     setMessage("");
 
-    alert(
-      messageType === "tribute"
-        ? "Your tribute has been submitted for review."
-        : "Your condolence has been submitted for review.",
-    );
+    setMessageNotice({
+      type: "success",
+      messageType: submittedType,
+      text:
+        submittedType === "tribute"
+          ? "Your tribute has been received and submitted for review."
+          : "Your condolence has been received and submitted for review.",
+    });
 
     return true;
   } catch (error) {
     console.error("Unable to submit message:", error);
 
-    alert("Unable to submit your message. Please try again.");
+    setMessageNotice({
+      type: "error",
+      text: "We couldn't submit your message just now. Please try again.",
+    });
 
     return false;
   } finally {
@@ -554,6 +569,8 @@ async function submitMessage(): Promise<boolean> {
           name={name}
           message={message}
           messageType={messageType}
+          messageNotice={messageNotice}
+          onDismissNotice={() => setMessageNotice(null)}
           setName={setName}
           setMessage={setMessage}
           setMessageType={setMessageType}
@@ -562,27 +579,50 @@ async function submitMessage(): Promise<boolean> {
           submittingMessage={submittingMessage}
           onSubmitMessage={submitMessage}
           candleLit={candleLit}
-          onShare={() => {
-            const memorialUrl = `${window.location.origin}/brochure/${id}`;
+          onShare={async () => {
+  const memorialUrl = `${window.location.origin}/brochure/${id}`;
 
-            if (navigator.share) {
-              void navigator.share({
-                title: brochure.name
-                  ? `Remembering ${brochure.name}`
-                  : "Euloges Memorial",
-                text: brochure.name
-                  ? `Remember ${brochure.name} on Euloges.`
-                  : "View this memorial on Euloges.",
-                url: memorialUrl,
-              });
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: brochure.name
+          ? `Remembering ${brochure.name}`
+          : "Euloges Memorial",
+        text: brochure.name
+          ? `Remember ${brochure.name} on Euloges.`
+          : "View this memorial on Euloges.",
+        url: memorialUrl,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
 
-              return;
-            }
+      setMessageNotice({
+        type: "error",
+        text: "We couldn't share this memorial. Please try again.",
+      });
+    }
 
-            void navigator.clipboard.writeText(memorialUrl);
+    return;
+  }
 
-            alert("Memorial link copied to your clipboard.");
-          }}
+  try {
+    await navigator.clipboard.writeText(memorialUrl);
+
+    setMessageNotice({
+      type: "success",
+      text: "Memorial link copied to your clipboard.",
+    });
+  } catch (error) {
+    console.error("Unable to copy memorial link:", error);
+
+    setMessageNotice({
+      type: "error",
+      text: "We couldn't copy the memorial link. Please try again.",
+    });
+  }
+}}
         />
 
         {canModerate && (

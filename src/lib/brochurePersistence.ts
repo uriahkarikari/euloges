@@ -1,22 +1,25 @@
 import type { BrochureDraft } from "@/types/brochure";
 
-import { saveBrochureDraft } from "@/lib/brochureStorage";
+import {
+  saveBrochureDraft,
+  saveBrochureDraftForSession,
+} from "@/lib/brochureStorage";
 
 import {
   createBrochureInSupabase,
   saveBrochureToSupabase,
 } from "@/lib/brochureSupabase";
 
-/*
- * Supabase saves are deliberately serialized.
- *
- * This prevents rapid autosave calls from creating
- * multiple memorials while a local draft is being
- * migrated from "draft-001" to a Supabase UUID.
- */
-let saveQueue: Promise<BrochureDraft | null> = Promise.resolve(null);
+type PersistenceState = {
+  queue: Promise<BrochureDraft | null>;
+  remoteMemorialId: string | null;
+  latestSaveVersion: number;
+};
 
-let remoteMemorialId: string | null = null;
+const states = new Map<string, PersistenceState>();
+
+let activeSessionKey: string | null = null;
+let nextSaveVersion = 0;
 
 function isLocalDraftId(id: string) {
   return id.startsWith("draft-");
@@ -25,78 +28,105 @@ function isLocalDraftId(id: string) {
 function snapshotDraft(draft: BrochureDraft): BrochureDraft {
   return {
     ...draft,
-    sections: draft.sections.map((section) => ({
-      ...section,
-    })),
+    sections: draft.sections.map((section) => ({ ...section })),
   };
 }
 
+function getState(sessionKey: string): PersistenceState {
+  let state = states.get(sessionKey);
+
+  if (!state) {
+    state = {
+      queue: Promise.resolve(null),
+      remoteMemorialId: null,
+      latestSaveVersion: 0,
+    };
+
+    states.set(sessionKey, state);
+  }
+
+  return state;
+}
+
+export function activateBrochurePersistence(sessionKey: string) {
+  activeSessionKey = sessionKey;
+}
+
+/**
+ * The optional session key keeps existing callers compatible.
+ * The editor should always supply its stable session key.
+ */
 export function persistBrochureDraft(
   draft: BrochureDraft,
+  sessionKey = `memorial:${draft.id}`,
+  creationRequestId?: string,
 ): Promise<BrochureDraft> {
-  /*
-   * Keep the current browser fallback immediately.
-   * A network failure therefore does not erase
-   * what the user has just entered.
-   */
-  saveBrochureDraft(draft);
-
   const snapshot = snapshotDraft(draft);
+  const state = getState(sessionKey);
+  const version = ++nextSaveVersion;
 
-  const task = saveQueue.then(async () => {
-    /*
-     * Existing Supabase-backed memorial.
-     */
+  state.latestSaveVersion = version;
+
+  // Preserve local recovery immediately, but only for the
+  // currently active editor session.
+  saveBrochureDraftForSession(sessionKey, snapshot);
+
+  if (activeSessionKey === sessionKey) {
+    saveBrochureDraft(snapshot);
+  }
+
+  const task = state.queue.then(async () => {
+    let saved: BrochureDraft;
+
     if (!isLocalDraftId(snapshot.id)) {
-      remoteMemorialId = snapshot.id;
-
-      const saved = await saveBrochureToSupabase(snapshot);
-
-      saveBrochureDraft(saved);
-
-      return saved;
-    }
-
-    /*
-     * This browser session has already migrated
-     * draft-001, but another autosave was queued
-     * before React received the new UUID.
-     */
-    if (remoteMemorialId) {
-      const saved = await saveBrochureToSupabase({
+      saved = await saveBrochureToSupabase(snapshot);
+      state.remoteMemorialId = saved.id;
+    } else if (state.remoteMemorialId) {
+      saved = await saveBrochureToSupabase({
         ...snapshot,
-        id: remoteMemorialId,
+        id: state.remoteMemorialId,
       });
+    } else {
+      if (!creationRequestId) {
+        throw new Error(
+          "A creation request ID is required to create a new memorial.",
+        );
+      }
 
-      saveBrochureDraft(saved);
+      saved = await createBrochureInSupabase(
+        snapshot,
+        creationRequestId,
+      );
 
-      return saved;
+      state.remoteMemorialId = saved.id;
+
+      // Apply the latest local snapshot even if creation was a retry
+      // that recovered a memorial created by an earlier request.
+      saved = await saveBrochureToSupabase({
+        ...snapshot,
+        id: saved.id,
+      });
     }
 
-    /*
-     * First persistence of a local-only draft.
-     * This creates exactly one Supabase memorial.
-     */
-    const created = await createBrochureInSupabase(snapshot);
+    // A late response must not replace the recovery draft
+    // belonging to another session or an older save.
+    if (state.latestSaveVersion === version) {
+      saveBrochureDraftForSession(sessionKey, saved);
 
-    remoteMemorialId = created.id;
+      if (activeSessionKey === sessionKey) {
+        saveBrochureDraft(saved);
+      }
+    }
 
-    saveBrochureDraft(created);
-
-    return created;
+    return saved;
   });
 
-  /*
-   * Keep the queue usable if one Supabase request fails.
-   * The caller still receives the original rejection,
-   * while later saves are allowed to continue.
-   */
-  saveQueue = task.catch(() => null);
+  // Let subsequent saves continue after a failed request.
+  state.queue = task.catch(() => null);
 
   return task;
 }
 
 export function resetBrochurePersistenceState() {
-  remoteMemorialId = null;
-  saveQueue = Promise.resolve(null);
+  activeSessionKey = null;
 }

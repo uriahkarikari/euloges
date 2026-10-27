@@ -248,7 +248,7 @@ async function hydratePage() {
         </p>
 
         <Link
-          href="/create-brochure"
+          href={`/create-brochure?new=${Date.now()}`}
           className="mt-4 inline-flex rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-sm font-medium text-white"
         >
           Create Memorial

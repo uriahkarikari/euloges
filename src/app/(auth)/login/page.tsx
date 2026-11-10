@@ -42,7 +42,7 @@ export default function LoginPage() {
 
      setIsSigningIn(false);
    }
- } 
+ }
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,7 +67,8 @@ export default function LoginPage() {
         throw error;
       }
 
-router.push("/");      router.refresh();
+router.push("/home");
+router.refresh();
     } catch (error) {
       console.error("Sign in failed:", error);
 

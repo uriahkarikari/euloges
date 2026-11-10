@@ -13,7 +13,7 @@ export default function Sidebar() {
   }
   return (
     <aside className="sticky top-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-      <Link href="/" className="block">
+      <Link href="/home" className="block">
         <h1 className="text-2xl font-semibold text-[#2F2F2F]">Euloges</h1>
 
         <p className="mt-1 text-xs text-gray-400">Legacy Workspace</p>
@@ -21,7 +21,7 @@ export default function Sidebar() {
 
       <nav className="mt-8 space-y-1 text-sm">
         <Link
-          href="/"
+          href="/home"
           className="block rounded-lg px-3 py-2.5 hover:bg-gray-50"
         >
           Home

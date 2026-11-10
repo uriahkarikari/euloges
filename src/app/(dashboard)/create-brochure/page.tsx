@@ -458,7 +458,7 @@ function finishEditingPublishedMemorial() {
   }
 
   function finishMemorial() {
-    router.push("/");
+    router.push("/home");
   }
 
   async function handlePortraitRemoved() {

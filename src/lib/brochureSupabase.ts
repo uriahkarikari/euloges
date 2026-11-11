@@ -13,6 +13,7 @@ type MemorialRow = {
   biography: string | null;
   portrait_url: string | null;
   privacy: "public" | "family";
+  allow_search_indexing: boolean;
   family_access_code: string | null;
   status: "draft" | "published" | "archived";
   published_at: string | null;
@@ -52,6 +53,7 @@ function mapMemorialToBrochure(
 
     privacy: memorial.privacy,
     accessCode: memorial.family_access_code ?? "",
+    allowSearchIndexing: memorial.allow_search_indexing ?? false,
 
     status: memorial.status === "published" ? "published" : "draft",
 
@@ -98,6 +100,7 @@ export async function createBrochureInSupabase(
         title: section.title,
         content: section.content,
       })),
+     p_allow_search_indexing: draft.allowSearchIndexing ?? false,
     },
   );
 
@@ -109,7 +112,7 @@ export async function createBrochureInSupabase(
     throw new Error("Memorial creation returned no memorial ID.");
   }
 
-  const saved = await loadBrochureFromSupabase(memorialId);
+  const saved = await loadOwnerBrochureFromSupabase(memorialId);
 
   if (!saved) {
     throw new Error("Created memorial could not be reloaded.");
@@ -125,7 +128,76 @@ export async function loadBrochureFromSupabase(
 
   const { data: memorial, error: memorialError } = await supabase
     .from("memorials")
+    .select(`
+      id,
+      owner_id,
+      name,
+      date_of_birth,
+      date_of_death,
+      biography,
+      portrait_url,
+      privacy,
+      allow_search_indexing,
+      status,
+      published_at,
+      created_at,
+      updated_at
+    `)
+    .eq("id", id)
+    .maybeSingle();
+
+  if (memorialError) {
+    throw memorialError;
+  }
+
+  if (!memorial) {
+    return null;
+  }
+
+  const { data: sections, error: sectionsError } = await supabase
+    .from("memorial_sections")
     .select("*")
+    .eq("memorial_id", id)
+    .order("position", {
+      ascending: true,
+    });
+
+  if (sectionsError) {
+    throw sectionsError;
+  }
+
+  return mapMemorialToBrochure(
+    {
+      ...memorial,
+      family_access_code: null,
+    } as MemorialRow,
+    (sections ?? []) as MemorialSectionRow[],
+  );
+}
+
+export async function loadOwnerBrochureFromSupabase(
+  id: string,
+): Promise<BrochureDraft | null> {
+  const supabase = createClient();
+
+  const { data: memorial, error: memorialError } = await supabase
+    .from("memorials")
+    .select(`
+      id,
+      owner_id,
+      name,
+      date_of_birth,
+      date_of_death,
+      biography,
+      portrait_url,
+      privacy,
+      allow_search_indexing,
+      family_access_code,
+      status,
+      published_at,
+      created_at,
+      updated_at
+    `)
     .eq("id", id)
     .maybeSingle();
 
@@ -155,7 +227,6 @@ export async function loadBrochureFromSupabase(
   );
 }
 
-
 export async function saveBrochureToSupabase(
   draft: BrochureDraft,
 ): Promise<BrochureDraft> {
@@ -176,13 +247,14 @@ export async function saveBrochureToSupabase(
       title: section.title,
       content: section.content,
     })),
+    p_allow_search_indexing: draft.allowSearchIndexing ?? false,
   });
 
   if (error) {
     throw error;
   }
 
-  const saved = await loadBrochureFromSupabase(draft.id);
+  const saved = await loadOwnerBrochureFromSupabase(draft.id);
 
   if (!saved) {
     throw new Error("Saved memorial could not be reloaded.");

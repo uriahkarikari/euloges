@@ -19,7 +19,7 @@ import {
 import BasicInfoCard from "@/components/brochure/BasicInfoCard";
 import BrochurePreview from "@/components/brochure/BrochurePreview";
 import SectionsBuilder from "@/components/brochure/SectionsBuilder";
-import { loadBrochureFromSupabase } from "@/lib/brochureSupabase";
+import { loadOwnerBrochureFromSupabase } from "@/lib/brochureSupabase";
 import type {
   BrochureDraft,
   BrochurePrivacy,
@@ -57,6 +57,7 @@ export default function CreateBrochurePage() {
   const [sections, setSections] = useState<BrochureSection[]>([]);
 
   const [privacy, setPrivacy] = useState<BrochurePrivacy>("public");
+  const [allowSearchIndexing, setAllowSearchIndexing] = useState(false);
   const [status, setStatus] = useState<"draft" | "published">("draft");
 
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
@@ -127,6 +128,7 @@ export default function CreateBrochurePage() {
             setPortraitUrl(saved.portraitUrl);
             setSections(saved.sections ?? []);
             setPrivacy(saved.privacy);
+            setAllowSearchIndexing(saved.allowSearchIndexing ?? false);
             setAccessCode(saved.accessCode);
             setStatus(saved.status);
             setPublishedAt(saved.publishedAt);
@@ -140,6 +142,7 @@ export default function CreateBrochurePage() {
             setPortraitUrl("");
             setSections([]);
             setPrivacy("public");
+            setAllowSearchIndexing(false);
             setAccessCode("");
             setStatus("draft");
             setPublishedAt(null);
@@ -149,7 +152,7 @@ export default function CreateBrochurePage() {
           return;
         }
         if (memorialToEdit) {
-          const saved = await loadBrochureFromSupabase(memorialToEdit);
+          const saved = await loadOwnerBrochureFromSupabase(memorialToEdit);
 
           if (!saved || cancelled) {
             return;
@@ -163,6 +166,7 @@ export default function CreateBrochurePage() {
           setPortraitUrl(saved.portraitUrl);
           setSections(saved.sections ?? []);
           setPrivacy(saved.privacy);
+          setAllowSearchIndexing(saved.allowSearchIndexing ?? false);
           setAccessCode(saved.accessCode);
           setStatus(saved.status);
           setPublishedAt(saved.publishedAt);
@@ -186,6 +190,7 @@ export default function CreateBrochurePage() {
           setPortraitUrl(saved.portraitUrl);
           setSections(saved.sections ?? []);
           setPrivacy(saved.privacy);
+          setAllowSearchIndexing(saved.allowSearchIndexing ?? false);
           setAccessCode(saved.accessCode);
           setStatus(saved.status);
           setPublishedAt(saved.publishedAt);
@@ -233,17 +238,16 @@ export default function CreateBrochurePage() {
    }
 
    const hasMemorialContent =
-  Boolean(name.trim()) ||
-  Boolean(dob.trim()) ||
-  Boolean(dod.trim()) ||
-  Boolean(bio.trim()) ||
-  Boolean(portraitUrl.trim()) ||
-  sections.length > 0;
+     Boolean(name.trim()) ||
+     Boolean(dob.trim()) ||
+     Boolean(dod.trim()) ||
+     Boolean(bio.trim()) ||
+     Boolean(portraitUrl.trim()) ||
+     sections.length > 0;
 
-if (isCreatingNew && !hasMemorialContent) {
-  return;
-}
-
+   if (isCreatingNew && !hasMemorialContent) {
+     return;
+   }
 
    let cancelled = false;
 
@@ -258,6 +262,7 @@ if (isCreatingNew && !hasMemorialContent) {
        sections,
        privacy,
        accessCode,
+       allowSearchIndexing,
        status,
        publishedAt,
        updatedAt: new Date().toISOString(),
@@ -309,6 +314,7 @@ if (isCreatingNew && !hasMemorialContent) {
    sections,
    privacy,
    accessCode,
+   allowSearchIndexing,
    status,
    publishedAt,
    hydrated,
@@ -332,6 +338,7 @@ if (isCreatingNew && !hasMemorialContent) {
       sections,
       privacy,
       accessCode,
+      allowSearchIndexing,
       status: nextStatus,
       publishedAt: nextPublishedAt,
       updatedAt: new Date().toISOString(),
@@ -704,6 +711,38 @@ function finishEditingPublishedMemorial() {
                 ? "Your memorial has been marked as published. You can now view, share or print it."
                 : "Preview the memorial first, then publish it when the family is ready."}
             </p>
+
+            <div className="mt-5 rounded-xl border border-black/10 bg-[#FAFAF8] p-4">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={allowSearchIndexing && privacy === "public"}
+                  disabled={privacy !== "public"}
+                  onChange={(event) =>
+                    setAllowSearchIndexing(event.target.checked)
+                  }
+                  className="mt-1 h-4 w-4 accent-[#7A9B8E]"
+                />
+
+                <span>
+                  <span className="block text-sm font-semibold text-[#2F2F2F]">
+                    Allow search engines to index this memorial
+                  </span>
+
+                  <span className="mt-1 block text-sm leading-6 text-black/55">
+                    Your memorial can be viewed by anyone with its link without
+                    appearing in Google search results. Enable this option if
+                    you want search engines to discover it.
+                  </span>
+
+                  <span className="mt-2 block text-xs text-black/40">
+                    Optional. Enabling this gives search engines permission to
+                    index the memorial but does not guarantee that it will
+                    appear in search results.
+                  </span>
+                </span>
+              </label>
+            </div>
           </div>
 
           {status === "draft" ? (

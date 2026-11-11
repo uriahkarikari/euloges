@@ -23,6 +23,7 @@ export type BrochureDraft = {
 
   privacy: BrochurePrivacy;
   accessCode: string;
+  allowSearchIndexing: boolean;
 
   // Publication lifecycle.
   status: BrochureStatus;

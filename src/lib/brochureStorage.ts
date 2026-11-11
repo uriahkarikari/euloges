@@ -16,6 +16,7 @@ function normalizeDraft(saved: Partial<BrochureDraft>): BrochureDraft {
     sections: saved.sections ?? [],
     privacy: saved.privacy ?? "public",
     accessCode: saved.accessCode ?? "",
+    allowSearchIndexing: saved.allowSearchIndexing ?? false,
     status: saved.status ?? "draft",
     publishedAt: saved.publishedAt ?? null,
     updatedAt: saved.updatedAt ?? new Date().toISOString(),

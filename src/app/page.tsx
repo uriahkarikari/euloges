@@ -67,6 +67,9 @@ export default function PublicHomePage() {
           <a href="#how-it-works" className="transition hover:text-[#2F2F2F]">
             How it works
           </a>
+          <Link href="/pricing" className="transition hover:text-[#2F2F2F]">
+            Pricing
+          </Link>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -346,6 +349,9 @@ export default function PublicHomePage() {
             </Link>
             <Link href="/signup" className="hover:text-[#2F2F2F]">
               Get started
+            </Link>
+            <Link href="/pricing" className="hover:text-[#2F2F2F]">
+              Pricing
             </Link>
             <Link href="/contact" className="hover:text-[#2F2F2F]">
               Contact

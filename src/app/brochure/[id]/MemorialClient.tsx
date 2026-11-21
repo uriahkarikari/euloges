@@ -353,7 +353,7 @@ async function submitMessage(): Promise<boolean> {
       <div className="flex min-h-screen items-center justify-center bg-[#F6F4F1] px-4">
         <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-8 text-center shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A9B8E]">
-            Euloges
+            Lifebree
           </p>
 
           <h1 className="mt-3 text-2xl font-semibold text-[#2F2F2F]">
@@ -374,7 +374,7 @@ async function submitMessage(): Promise<boolean> {
       <div className="flex min-h-screen items-center justify-center bg-[#F6F4F1] px-4">
         <div className="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <p className="text-xs uppercase tracking-wide text-gray-400">
-            Euloges
+            Lifebree
           </p>
 
           <h1 className="mt-2 text-xl font-semibold">Private Memorial</h1>
@@ -587,10 +587,10 @@ async function submitMessage(): Promise<boolean> {
       await navigator.share({
         title: brochure.name
           ? `Remembering ${brochure.name}`
-          : "Euloges Memorial",
+          : "Lifebree Memorial",
         text: brochure.name
-          ? `Remember ${brochure.name} on Euloges.`
-          : "View this memorial on Euloges.",
+          ? `Remember ${brochure.name} on Lifebree.`
+          : "View this memorial on Lifebree.",
         url: memorialUrl,
       });
     } catch (error) {
@@ -695,7 +695,7 @@ async function submitMessage(): Promise<boolean> {
 
         <footer className="border-t border-gray-200 pt-7 text-center">
           <p className="text-sm text-gray-400">
-            This memorial was preserved on Euloges.
+            This memorial was preserved on Lifebree.
           </p>
         </footer>
       </main>

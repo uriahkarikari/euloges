@@ -103,9 +103,9 @@ export default function PublicHomePage() {
           </h1>
 
           <p className="mt-8 max-w-xl text-base leading-8 text-[#716C64] sm:text-lg">
-            Lifebree gives families a meaningful place to preserve the stories,
-            photographs and memories of those they love — and to share their
-            legacy with the people who matter.
+            Lifebree is a home for life's stories, milestones and memories. Begin by
+            creating a lasting remembrance of someone you love, bringing their
+            story, photographs, tributes and the people who remember them together.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -205,7 +205,7 @@ export default function PublicHomePage() {
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#A17D32]">
-              More than a memorial
+              The Library of Life
             </p>
             <h2 className="mt-6 max-w-xl text-4xl font-medium leading-tight tracking-tight sm:text-5xl">
               Some stories are too important to be forgotten.
@@ -214,15 +214,15 @@ export default function PublicHomePage() {
 
           <div className="flex flex-col justify-end">
             <p className="text-base leading-8 text-[#716C64]">
-              Remembering someone should not end with a ceremony or a printed
-              programme. Their experiences, relationships, achievements and
-              the memories they leave behind deserve a place that can be
-              revisited and shared across generations.
+              A life is made up of many moments: the people we love, the milestones we
+              celebrate, the experiences that shape us and the stories we pass
+              on. These moments deserve more than a place in a camera roll or a
+              printed programme.
             </p>
             <p className="mt-5 text-base leading-8 text-[#716C64]">
-              Lifebree brings these moments together in a thoughtful digital
-              space, giving families and friends a way to celebrate a life and
-              preserve its story.
+              Lifebree is being shaped as a digital home for those moments. Today, you can
+              create memorial pages, funeral brochures and condolence books to
+              honour a loved one and bring family and friends together.
             </p>
           </div>
         </div>
@@ -238,11 +238,11 @@ export default function PublicHomePage() {
             What you can do
           </p>
           <h2 className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-            A thoughtful way to remember.
+            A place to honour and remember.
           </h2>
           <p className="mt-5 leading-8 text-[#716C64]">
-            Everything families need to create, share and preserve a meaningful
-            digital remembrance.
+            Create a memorial, prepare a funeral brochure, and invite family and friends
+            to share tributes and condolences.
           </p>
         </div>
 
@@ -275,7 +275,7 @@ export default function PublicHomePage() {
               A simple process
             </p>
             <h2 className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-              Create a place for remembrance.
+              Create and share a meaningful remembrance.
             </h2>
           </div>
 
@@ -314,14 +314,14 @@ export default function PublicHomePage() {
       {/* Final call to action */}
       <section className="border-t border-[#E7E0D6] bg-white px-6 py-24 text-center lg:py-28">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#A17D32]">
-          Begin a remembrance
+          Keep a life story close
         </p>
         <h2 className="mx-auto mt-6 max-w-3xl text-4xl font-medium tracking-tight sm:text-5xl">
           Give their story a place to live on.
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-sm leading-8 text-[#716C64]">
-          Create a digital memorial and bring together the memories, stories
-          and people that make a life unforgettable.
+          Create a digital memorial, share a funeral programme and bring together
+          the tributes and memories of family and friends.
         </p>
         <Link
           href="/signup"
@@ -339,7 +339,7 @@ export default function PublicHomePage() {
               Lifebree<span className="text-[#C9A44C]">.</span>
             </Link>
             <p className="mt-2 text-xs text-[#827C73]">
-              Honouring lives. Preserving memories.
+              The Library of Life · Every life has a story worth keeping.
             </p>
           </div>
 

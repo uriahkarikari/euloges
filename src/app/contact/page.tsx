@@ -2,12 +2,12 @@
 import Link from "next/link";
 
 const phone = "+233256481007";
-const whatsapp = "https://wa.me/233256481007?text=Hello%20Euloges%2C%20I%20need%20some%20assistance.";
+const whatsapp = "https://wa.me/233256481007?text=Hello%20Lifebree%2C%20I%20need%20some%20assistance.";
 
 export const metadata = {
-  title: "Contact Euloges",
+  title: "Contact Lifebree",
   description:
-    "Contact Euloges for assistance with digital memorials, funeral brochures and preserving cherished memories.",
+    "Contact Lifebree for assistance with digital memorials, funeral brochures and preserving cherished memories.",
 };
 
 export default function ContactPage() {
@@ -15,7 +15,7 @@ export default function ContactPage() {
     <main className="min-h-screen bg-[#F6F4F1] px-6 py-10 text-[#2F2F2F]">
       <div className="mx-auto max-w-3xl">
         <Link href="/" className="text-xl font-semibold">
-          Euloges<span className="text-[#C9A44C]">.</span>
+          Lifebree<span className="text-[#C9A44C]">.</span>
         </Link>
 
         <section className="py-20">
@@ -29,7 +29,7 @@ export default function ContactPage() {
 
           <p className="mt-6 max-w-xl text-base leading-8 text-[#716C64]">
             Whether you need help creating a memorial, have a question
-            about Euloges or simply want to know more about our platform,
+            about Lifebree or simply want to know more about our platform,
             we'd be happy to hear from you.
           </p>
 
@@ -71,7 +71,7 @@ export default function ContactPage() {
                 href={`tel:${phone}`}
                 className="mt-8 inline-flex w-full items-center justify-center rounded-full border border-[#D8D0C4] px-5 py-3 text-sm font-medium text-[#2F2F2F] transition hover:bg-[#F6F4F1]"
               >
-                Call Euloges →
+                Call Lifebree →
               </a>
             </div>
           </div>
@@ -79,10 +79,10 @@ export default function ContactPage() {
 
         <footer className="border-t border-[#E7E0D6] py-7 text-sm text-[#827C73]">
           <Link href="/" className="hover:text-[#2F2F2F]">
-            ← Back to Euloges
+            ← Back to Lifebree
           </Link>
           <p className="mt-4 text-xs">
-            © {new Date().getFullYear()} Euloges. All rights reserved.
+            © {new Date().getFullYear()} Lifebree. All rights reserved.
           </p>
         </footer>
       </div>

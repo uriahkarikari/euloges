@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "Create beautiful digital memorials, preserve life stories and photographs, share tributes and condolences, and honour the people who matter.",
+    "A digital home for life's stories, milestones and memories. Create memorials, share tributes and preserve the stories of the people who matter.",
 
   applicationName: "Lifebree",
 

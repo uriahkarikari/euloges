@@ -7,14 +7,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.euloges.com"),
 
   title: {
-    default: "Euloges | Digital Memorials & Online Remembrance",
-    template: "%s | Euloges",
+    default: "Lifebree | The Library of Life",
+    template: "%s | Lifebree",
   },
 
   description:
     "Create beautiful digital memorials, preserve life stories and photographs, share tributes and condolences, and honour the people who matter.",
 
-  applicationName: "Euloges",
+  applicationName: "Lifebree",
 
   keywords: [
     "digital memorials",
@@ -30,18 +30,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "https://www.euloges.com",
-    siteName: "Euloges",
-    title: "Euloges | A Life Remembered. A Legacy Preserved.",
+    siteName: "Lifebree",
+    title: "Lifebree | The Library of Life",
     description:
-      "A meaningful place to preserve life stories, photographs and cherished memories.",
+      "A thoughtful home for life's stories, milestones, memories and legacies.",
     locale: "en_GH",
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Euloges | A Life Remembered. A Legacy Preserved.",
+    title: "Lifebree | The Library of Life",
     description:
-      "Create a digital memorial and preserve the stories and memories of those you love.",
+      "Preserve life's stories, celebrate meaningful moments and keep memories close across generations.",
   },
 };
 

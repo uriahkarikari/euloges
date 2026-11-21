@@ -72,7 +72,7 @@ const { error } = await supabase.auth.resetPasswordForEmail(
       </h1>
 
       <p className="mt-2 text-center text-sm text-gray-500">
-        Enter the email address associated with your Euloges account.
+        Enter the email address associated with your Lifebree account.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">

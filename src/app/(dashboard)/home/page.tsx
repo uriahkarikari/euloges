@@ -19,7 +19,7 @@ export default function DashboardPage() {
       setFeed(items);
     } catch (loadError) {
       console.error("Unable to load home feed:", loadError);
-      setError("Unable to load the Euloges feed.");
+      setError("Unable to load the Lifebree feed.");
     }
   }, []);
 
@@ -37,7 +37,7 @@ export default function DashboardPage() {
         console.error("Unable to load home feed:", loadError);
 
         if (!cancelled) {
-          setError("Unable to load the Euloges feed.");
+          setError("Unable to load the Lifebree feed.");
         }
       } finally {
         if (!cancelled) {

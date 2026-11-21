@@ -1,6 +1,6 @@
 -- Lifebree billing foundation.
--- Prices are the agreed working USD catalogue. GHS checkout amounts and
--- Paystack plan codes remain NULL until configured and verified in Paystack.
+-- Prices retain the agreed USD reference values and the approved fixed GHS monthly prices.
+-- amount_minor is stored in pesewas. Paystack plan codes remain NULL until configured.
 -- This migration creates billing records only; it does not enable checkout.
 
 CREATE TABLE IF NOT EXISTS public.billing_plans (
@@ -24,15 +24,16 @@ COMMENT ON TABLE public.billing_plans IS
   'Configurable Lifebree subscription catalogue. amount_minor is GHS pesewas and remains unset until launch pricing is configured.';
 
 INSERT INTO public.billing_plans
-  (id, name, price_usd, storage_gb, storage_scope)
+  (id, name, price_usd, amount_minor, storage_gb, storage_scope)
 VALUES
-  ('personal', 'Personal', 3.99, 10, 'personal'),
-  ('personal-plus', 'Personal Plus', 7.99, 50, 'personal'),
-  ('family', 'Family', 9.99, 100, 'family_shared'),
-  ('family-legacy', 'Family Legacy', 19.99, 250, 'family_shared')
+  ('personal', 'Personal', 3.99, 4999, 10, 'personal'),
+  ('personal-plus', 'Personal Plus', 7.99, 9999, 50, 'personal'),
+  ('family', 'Family', 9.99, 12499, 100, 'family_shared'),
+  ('family-legacy', 'Family Legacy', 19.99, 24999, 250, 'family_shared')
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   price_usd = EXCLUDED.price_usd,
+  amount_minor = EXCLUDED.amount_minor,
   storage_gb = EXCLUDED.storage_gb,
   storage_scope = EXCLUDED.storage_scope,
   updated_at = now();

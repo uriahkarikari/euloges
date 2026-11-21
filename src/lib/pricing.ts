@@ -2,6 +2,7 @@ export type PricingPlan = {
   id: string;
   name: string;
   priceUsd: number;
+  priceGhs: number;
   storageGb: number;
   audience: string;
   description: string;
@@ -14,6 +15,7 @@ export const pricingPlans: PricingPlan[] = [
     id: "personal",
     name: "Personal",
     priceUsd: 3.99,
+    priceGhs: 49.99,
     storageGb: 10,
     audience: "For your own memories and milestones",
     description: "A personal space to collect the moments and stories that matter to you.",
@@ -23,6 +25,7 @@ export const pricingPlans: PricingPlan[] = [
     id: "personal-plus",
     name: "Personal Plus",
     priceUsd: 7.99,
+    priceGhs: 99.99,
     storageGb: 50,
     audience: "For a richer personal archive",
     description: "More room to preserve the experiences, people and chapters of your life.",
@@ -33,6 +36,7 @@ export const pricingPlans: PricingPlan[] = [
     id: "family",
     name: "Family",
     priceUsd: 9.99,
+    priceGhs: 124.99,
     storageGb: 100,
     audience: "For families preserving stories together",
     description: "A shared family space for memories, milestones and stories across generations.",
@@ -42,6 +46,7 @@ export const pricingPlans: PricingPlan[] = [
     id: "family-legacy",
     name: "Family Legacy",
     priceUsd: 19.99,
+    priceGhs: 249.99,
     storageGb: 250,
     audience: "For a deeper family history",
     description: "More shared capacity for a growing collection of family stories and memories.",
@@ -53,5 +58,12 @@ export const formatUsd = (amount: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    minimumFractionDigits: 2,
+  }).format(amount);
+
+export const formatGhs = (amount: number) =>
+  new Intl.NumberFormat("en-GH", {
+    style: "currency",
+    currency: "GHS",
     minimumFractionDigits: 2,
   }).format(amount);

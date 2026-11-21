@@ -162,11 +162,11 @@ async function hydratePage() {
         await navigator.share({
           title: brochure.name
             ? `Book of Condolence for ${brochure.name}`
-            : "Euloges Book of Condolence",
+            : "Lifebree Book of Condolence",
 
           text: brochure.name
-            ? `Sign the Book of Condolence for ${brochure.name} on Euloges.`
-            : "Sign this Book of Condolence on Euloges.",
+            ? `Sign the Book of Condolence for ${brochure.name} on Lifebree.`
+            : "Sign this Book of Condolence on Lifebree.",
 
           url: bookUrl,
         });
@@ -472,7 +472,7 @@ async function hydratePage() {
             onClick={(event) => event.stopPropagation()}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A9B8E]">
-              Euloges
+              Lifebree
             </p>
 
             <h2 className="mt-2 text-xl font-semibold text-[#2F2F2F]">

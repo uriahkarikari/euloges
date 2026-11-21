@@ -37,7 +37,7 @@ export async function generateMetadata({
 
   if (!memorial) {
     return {
-      title: "Memorial Not Found | Euloges",
+      title: "Memorial Not Found | Lifebree",
       robots: {
         index: false,
         follow: false,
@@ -53,7 +53,7 @@ export async function generateMetadata({
 
   const description =
     memorial.biography?.trim().slice(0, 155) ||
-    `Remember and celebrate the life of ${memorial.name} on Euloges.`;
+    `Remember and celebrate the life of ${memorial.name} on Lifebree.`;
 
   return {
     title,
@@ -75,7 +75,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url: `${SITE_URL}/brochure/${id}`,
-      siteName: "Euloges",
+      siteName: "Lifebree",
       title,
       description,
       images: memorial.portrait_url

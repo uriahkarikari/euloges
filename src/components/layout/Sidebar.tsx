@@ -14,9 +14,9 @@ export default function Sidebar() {
   return (
     <aside className="sticky top-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
       <Link href="/home" className="block">
-        <h1 className="text-2xl font-semibold text-[#2F2F2F]">Euloges</h1>
+        <h1 className="text-2xl font-semibold text-[#2F2F2F]">Lifebree</h1>
 
-        <p className="mt-1 text-xs text-gray-400">Legacy Workspace</p>
+        <p className="mt-1 text-xs text-gray-400">Your Lifebree</p>
       </Link>
 
       <nav className="mt-8 space-y-1 text-sm">

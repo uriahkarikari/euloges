@@ -89,7 +89,7 @@ router.refresh();
       </h1>
 
       <p className="text-sm text-gray-500 text-center mt-2">
-        Sign in to manage memorials and preserve memories.
+        Sign in to continue preserving and sharing the stories that matter.
       </p>
 
       <button

@@ -16,7 +16,7 @@ export default function MobileNav() {
 
   function createNewMemorial() {
     setOpen(false);
-    router.push(`/create-brochure?new=${Date.now()}`);
+    router.push(`/create-brochure?new=${crypto.randomUUID()}`);
   }
 
   return (

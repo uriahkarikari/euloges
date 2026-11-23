@@ -30,7 +30,7 @@ export default function Sidebar() {
         <div className="mt-3 space-y-1">
           <button type="button" onClick={() => router.push("/create-brochure")} className={navClass + " w-full text-left"}><span>＋</span> Create a brochure</button>
           <button type="button" onClick={createNewMemorial} className={navClass + " w-full text-left"}><span>✧</span> Create a memorial</button>
-          <div className="rounded-xl px-3 py-2.5 text-sm text-[#A39D94]" title="Invitation creation is planned for a later frontend milestone"><span className="mr-3">✉</span> Invitations <span className="ml-1 text-[10px] uppercase tracking-wide">Soon</span></div>
+          <Link href="/invitations" className={navClass}><span>✉</span> Invitations</Link>
           <div className="rounded-xl px-3 py-2.5 text-sm text-[#A39D94]" title="Event creation is planned for a later frontend milestone"><span className="mr-3">✦</span> Create an event <span className="ml-1 text-[10px] uppercase tracking-wide">Soon</span></div>
         </div>
       </div>

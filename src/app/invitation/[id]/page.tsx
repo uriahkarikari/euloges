@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -31,20 +32,24 @@ export default function PublicInvitationPage() {
   const [url, setUrl] = useState("");
 
   useEffect(() => {
-    setUrl(window.location.href);
     let active = true;
-    (async () => {
-      const { data, error } = await createClient()
+
+    async function loadInvitation() {
+      const { data, error: loadError } = await createClient()
         .from("invitations")
         .select("id,title,host_name,description,starts_at,venue_name,venue_address,map_url,cover_image_url")
         .eq("id", id)
         .eq("status", "published")
         .maybeSingle();
+
       if (!active) return;
-      if (error) setError(error.message);
+      setUrl(window.location.href);
+      if (loadError) setError(loadError.message);
       else setItem(data);
       setLoading(false);
-    })();
+    }
+
+    void loadInvitation();
     return () => { active = false; };
   }, [id]);
 
@@ -52,7 +57,7 @@ export default function PublicInvitationPage() {
     event.preventDefault();
     setBusy(true);
     setError("");
-    const { error } = await createClient().from("invitation_rsvps").insert({
+    const { error: submitError } = await createClient().from("invitation_rsvps").insert({
       invitation_id: id,
       guest_name: name.trim(),
       guest_email: email.trim() || null,
@@ -61,7 +66,7 @@ export default function PublicInvitationPage() {
       message: message.trim() || null,
     });
     setBusy(false);
-    if (error) setError(error.message);
+    if (submitError) setError(submitError.message);
     else setSent(true);
   }
 
@@ -88,7 +93,7 @@ export default function PublicInvitationPage() {
             {item.map_url && <a href={item.map_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[#9A762F] underline">Get directions</a>}
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <button onClick={() => navigator.share ? navigator.share({ title: item.title, url }) : navigator.clipboard.writeText(url)} className="rounded-xl bg-[#302F2B] px-4 py-2.5 text-sm text-white">Share invitation</button>
+            <button type="button" onClick={() => navigator.share ? void navigator.share({ title: item.title, url }) : void navigator.clipboard.writeText(url)} className="rounded-xl bg-[#302F2B] px-4 py-2.5 text-sm text-white">Share invitation</button>
             <div className="rounded-xl border p-2"><QRCodeCanvas value={url} size={104} includeMargin /><p className="text-[10px] text-[#817B72]">Scan to open</p></div>
           </div>
         </div>

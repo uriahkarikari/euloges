@@ -16,18 +16,6 @@ type PageProps = {
 
 const SITE_URL = "https://www.euloges.com";
 
-function formatMemorialDate(
-  date: string | null,
-): string | null {
-  if (!date) return null;
-
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -37,7 +25,7 @@ export async function generateMetadata({
 
   if (!memorial) {
     return {
-      title: "Memorial Not Found | Euloges",
+      title: "Memorial Not Found | Lifebree",
       robots: {
         index: false,
         follow: false,
@@ -53,7 +41,7 @@ export async function generateMetadata({
 
   const description =
     memorial.biography?.trim().slice(0, 155) ||
-    `Remember and celebrate the life of ${memorial.name} on Euloges.`;
+    `Remember and celebrate the life of ${memorial.name} on Lifebree.`;
 
   return {
     title,
@@ -75,7 +63,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       url: `${SITE_URL}/brochure/${id}`,
-      siteName: "Euloges",
+      siteName: "Lifebree",
       title,
       description,
       images: memorial.portrait_url

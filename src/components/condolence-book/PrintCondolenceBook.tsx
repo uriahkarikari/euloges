@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { QRCodeCanvas } from "qrcode.react";
 
 import type { BrochureDraft } from "@/types/brochure";
@@ -26,18 +27,22 @@ export default function PrintCondolenceBook({
     >
       <header className="border-b border-black/15 pb-8 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#C9A44C]">
-          Euloges
+          Lifebree
         </p>
 
         <div className="mx-auto mt-5 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#EEEAE4] shadow-sm">
           {brochure.portraitUrl ? (
-            <img
+            <Image
               src={brochure.portraitUrl}
               alt={
                 brochure.name
                   ? `${brochure.name} memorial portrait`
                   : "Memorial portrait"
               }
+              width={144}
+              height={144}
+              unoptimized
+              loading="eager"
               className="h-full w-full object-cover"
             />
           ) : (

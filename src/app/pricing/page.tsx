@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatUsd, pricingPlans } from "@/lib/pricing";
+import { formatGhs, pricingPlans } from "@/lib/pricing";
 
 export const metadata = {
   title: "Plans & Pricing | Lifebree",
@@ -26,7 +26,7 @@ export default function PricingPage() {
           Start with a personal collection or bring your family’s stories together.
           Choose the space that fits the memories you want to preserve.
         </p>
-        <p className="mt-5 text-sm text-[#8A837A]">All prices are in US dollars and billed monthly.</p>
+        <p className="mt-5 text-sm text-[#8A837A]">All prices are in Ghana cedis (GH₵) and billed monthly.</p>
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-6 pb-20 md:grid-cols-2 xl:grid-cols-4 lg:px-10">
@@ -42,7 +42,7 @@ export default function PricingPage() {
             )}
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#A17D32]">{plan.name}</p>
-              <p className="mt-5 text-4xl font-semibold tracking-tight">{formatUsd(plan.priceUsd)}<span className="ml-1 text-sm font-normal text-[#8A837A]">/ month</span></p>
+              <p className="mt-5 text-4xl font-semibold tracking-tight">{formatGhs(plan.priceGhs)}<span className="ml-1 text-sm font-normal text-[#8A837A]">/ month</span></p>
               <p className="mt-3 min-h-10 text-sm leading-6 text-[#716C64]">{plan.audience}</p>
               <div className="mt-6 rounded-xl bg-[#F6F4F1] px-4 py-3">
                 <p className="text-2xl font-semibold">{plan.storageGb} GB</p>
@@ -78,8 +78,8 @@ export default function PricingPage() {
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-[#716C64]">
             These are the initial monthly plan prices. Online subscription checkout,
-            local-currency conversion and additional-storage purchases will be enabled
-            as the payment and billing system is connected.
+            card and Mobile Money checkout, and additional-storage purchases, will be enabled
+            once the payment and billing system is connected.
           </p>
         </div>
         <p className="mt-8 text-center text-xs text-[#999187]">

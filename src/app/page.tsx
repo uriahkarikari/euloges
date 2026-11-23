@@ -4,27 +4,27 @@ import Link from "next/link";
 const features = [
   {
     number: "01",
-    title: "Digital Memorials",
+    title: "Life Stories & Memories",
     description:
-      "Create a lasting space for someone's story, photographs, biography and the moments that made their life meaningful.",
+      "Preserve personal stories, photographs and the moments that make a life meaningful.",
   },
   {
     number: "02",
-    title: "Funeral Brochures",
+    title: "Meaningful Life Events",
     description:
-      "Create beautifully organised, printable memorial brochures that families can share and preserve.",
+      "Create and share thoughtful pages for life's important gatherings and milestones.",
   },
   {
     number: "03",
-    title: "Tributes & Condolences",
+    title: "Family & Community Memories",
     description:
-      "Give family and friends a place to express their love, share memories and offer words of comfort.",
+      "Bring family and friends together to share memories, celebrate milestones and support one another.",
   },
   {
     number: "04",
-    title: "A Living Remembrance",
+    title: "A Legacy That Lives On",
     description:
-      "Light a candle, revisit cherished memories and return to a place where a life continues to be celebrated.",
+      "Revisit cherished memories and keep the stories of people and families alive across generations.",
   },
 ];
 
@@ -51,9 +51,9 @@ export default function PublicHomePage() {
     <main className="min-h-screen overflow-hidden bg-[#F6F4F1] text-[#2F2F2F]">
       {/* Navigation */}
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
-        <Link href="/" aria-label="Euloges home">
+        <Link href="/" aria-label="Lifebree home">
           <span className="text-2xl font-semibold tracking-tight">
-            Euloges<span className="text-[#C9A44C]">.</span>
+            Lifebree<span className="text-[#C9A44C]">.</span>
           </span>
         </Link>
 
@@ -92,20 +92,20 @@ export default function PublicHomePage() {
       <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-6 pb-24 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:pb-32 lg:pt-20">
         <div className="relative z-10">
           <p className="mb-7 text-xs font-semibold uppercase tracking-[0.28em] text-[#A17D32]">
-            Remember · Honour · Preserve
+            Celebrate · Preserve · Remember
           </p>
 
           <h1 className="max-w-2xl text-5xl font-medium leading-[1.12] tracking-tight sm:text-6xl lg:text-7xl">
-            Every life leaves a story worth{" "}
+            Every life has a story worth{" "}
             <span className="font-serif italic text-[#A17D32]">
               remembering.
             </span>
           </h1>
 
           <p className="mt-8 max-w-xl text-base leading-8 text-[#716C64] sm:text-lg">
-            Euloges gives families a meaningful place to preserve the stories,
-            photographs and memories of those they love — and to share their
-            legacy with the people who matter.
+            Lifebree is a home for life&apos;s stories, milestones and memories. Begin by
+            creating a lasting remembrance of someone you love, bringing their
+            story, photographs, tributes and the people who remember them together.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -113,14 +113,14 @@ export default function PublicHomePage() {
               href="/signup"
               className="rounded-full bg-[#2F2F2F] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#49443D]"
             >
-              Create a memorial <span aria-hidden="true">→</span>
+              Begin your story <span aria-hidden="true">→</span>
             </Link>
 
             <a
               href="#about"
               className="rounded-full border border-[#D8D0C4] px-7 py-4 text-sm font-medium text-[#2F2F2F] transition hover:bg-white"
             >
-              Discover Euloges
+              Discover Lifebree
             </a>
           </div>
 
@@ -138,7 +138,7 @@ export default function PublicHomePage() {
           <div className="relative rounded-[2rem] border border-white/80 bg-white/65 p-5 shadow-[0_30px_90px_rgba(47,47,47,0.08)] sm:p-8">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold tracking-tight">
-                Euloges<span className="text-[#C9A44C]">.</span>
+                Lifebree<span className="text-[#C9A44C]">.</span>
               </span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-[#9A9388]">
                 A life remembered
@@ -205,7 +205,7 @@ export default function PublicHomePage() {
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-2 lg:gap-24">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#A17D32]">
-              More than a memorial
+              The Library of Life
             </p>
             <h2 className="mt-6 max-w-xl text-4xl font-medium leading-tight tracking-tight sm:text-5xl">
               Some stories are too important to be forgotten.
@@ -214,15 +214,15 @@ export default function PublicHomePage() {
 
           <div className="flex flex-col justify-end">
             <p className="text-base leading-8 text-[#716C64]">
-              Remembering someone should not end with a ceremony or a printed
-              programme. Their experiences, relationships, achievements and
-              the memories they leave behind deserve a place that can be
-              revisited and shared across generations.
+              A life is made up of many moments: the people we love, the milestones we
+              celebrate, the experiences that shape us and the stories we pass
+              on. These moments deserve more than a place in a camera roll or a
+              printed programme.
             </p>
             <p className="mt-5 text-base leading-8 text-[#716C64]">
-              Euloges brings these moments together in a thoughtful digital
-              space, giving families and friends a way to celebrate a life and
-              preserve its story.
+              Lifebree is being shaped as a digital home for those moments. Today, you can
+              create memorial pages, funeral brochures and condolence books to
+              honour a loved one and bring family and friends together.
             </p>
           </div>
         </div>
@@ -238,11 +238,11 @@ export default function PublicHomePage() {
             What you can do
           </p>
           <h2 className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-            A thoughtful way to remember.
+            A place to honour and remember.
           </h2>
           <p className="mt-5 leading-8 text-[#716C64]">
-            Everything families need to create, share and preserve a meaningful
-            digital remembrance.
+            Create a memorial, prepare a funeral brochure, and invite family and friends
+            to share tributes and condolences.
           </p>
         </div>
 
@@ -275,7 +275,7 @@ export default function PublicHomePage() {
               A simple process
             </p>
             <h2 className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-              Create a place for remembrance.
+              Create and share a meaningful remembrance.
             </h2>
           </div>
 
@@ -305,7 +305,7 @@ export default function PublicHomePage() {
             Every family should have a choice in how memories are shared.
           </h2>
           <p className="mt-6 max-w-2xl text-sm leading-8 text-white/65">
-            Euloges supports public and family-private memorials, giving
+            Lifebree supports public and family-private memorials, giving
             families control over who can access their remembrance pages.
           </p>
         </div>
@@ -314,20 +314,20 @@ export default function PublicHomePage() {
       {/* Final call to action */}
       <section className="border-t border-[#E7E0D6] bg-white px-6 py-24 text-center lg:py-28">
         <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#A17D32]">
-          Begin a remembrance
+          Keep a life story close
         </p>
         <h2 className="mx-auto mt-6 max-w-3xl text-4xl font-medium tracking-tight sm:text-5xl">
           Give their story a place to live on.
         </h2>
         <p className="mx-auto mt-6 max-w-xl text-sm leading-8 text-[#716C64]">
-          Create a digital memorial and bring together the memories, stories
-          and people that make a life unforgettable.
+          Create a digital memorial, share a funeral programme and bring together
+          the tributes and memories of family and friends.
         </p>
         <Link
           href="/signup"
           className="mt-9 inline-flex rounded-full bg-[#2F2F2F] px-8 py-4 text-sm font-medium text-white transition hover:bg-[#49443D]"
         >
-          Create a memorial <span className="ml-2">→</span>
+          Begin your story <span className="ml-2">→</span>
         </Link>
       </section>
 
@@ -336,10 +336,10 @@ export default function PublicHomePage() {
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <div>
             <Link href="/" className="text-xl font-semibold">
-              Euloges<span className="text-[#C9A44C]">.</span>
+              Lifebree<span className="text-[#C9A44C]">.</span>
             </Link>
             <p className="mt-2 text-xs text-[#827C73]">
-              Honouring lives. Preserving memories.
+              The Library of Life · Every life has a story worth keeping.
             </p>
           </div>
 
@@ -360,7 +360,7 @@ export default function PublicHomePage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-7xl border-t border-[#E7E0D6] pt-6 text-xs text-[#999187]">
-          © {new Date().getFullYear()} Euloges. All rights reserved.
+          © {new Date().getFullYear()} Lifebree. All rights reserved.
         </div>
       </footer>
     </main>

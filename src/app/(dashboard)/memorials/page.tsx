@@ -19,7 +19,7 @@ export default function MemorialsPage() {
  
 
   function createNewMemorial() {
-    router.push(`/create-brochure?new=${Date.now()}`);
+    router.push(`/create-brochure?new=${crypto.randomUUID()}`);
   }
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function MemorialsPage() {
             </h1>
 
             <p className="mt-2 text-sm text-gray-500">
-              Manage the memorials you have created on Euloges.
+              Manage the memorials you have created on Lifebree.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 import {
@@ -41,9 +41,7 @@ export default function CreateBrochurePage() {
       ? `new:${newMemorialRequest}`
       : "recovery";
   const isCreatingNew = Boolean(newMemorialRequest);
-  const [creationRequestId, setCreationRequestId] = useState<
-    string | undefined
-  >(undefined);
+  const creationRequestIdRef = useRef<string | undefined>(undefined);
   const [brochureId, setBrochureId] = useState("draft-001");
   const router = useRouter();
 
@@ -67,11 +65,11 @@ export default function CreateBrochurePage() {
   const [editingPublishedMemorial, setEditingPublishedMemorial] =
     useState(false);
 
-    function canPersistMemorial(): boolean {
+  function canPersistMemorial(): boolean {
     if (
       !memorialToEdit &&
       (isCreatingNew || brochureId.startsWith("draft-")) &&
-      !creationRequestId
+      !creationRequestIdRef.current
     ) {
       alert(
         "Memorial recovery could not be prepared. Please check your browser storage settings and try again.",
@@ -90,24 +88,20 @@ export default function CreateBrochurePage() {
   );
 
   useEffect(() => {
+    creationRequestIdRef.current = undefined;
+
     if (memorialToEdit) {
-      setCreationRequestId(undefined);
       return;
     }
 
     if (isCreatingNew || persistenceSessionKey === "recovery") {
       try {
-        setCreationRequestId(
-          getOrCreateCreationRequestId(persistenceSessionKey),
-        );
+        creationRequestIdRef.current =
+          getOrCreateCreationRequestId(persistenceSessionKey);
       } catch (error) {
         console.error("Unable to prepare memorial creation:", error);
-        setCreationRequestId(undefined);
       }
-      return;
     }
-
-    setCreationRequestId(undefined);
   }, [memorialToEdit, isCreatingNew, persistenceSessionKey]);
 
   useEffect(() => {
@@ -232,7 +226,7 @@ export default function CreateBrochurePage() {
      loadingMemorial ||
      (!memorialToEdit &&
        (isCreatingNew || brochureId.startsWith("draft-")) &&
-       !creationRequestId)
+       !creationRequestIdRef.current)
    ) {
      return;
    }
@@ -272,7 +266,7 @@ export default function CreateBrochurePage() {
        const saved = await persistBrochureDraft(
          draft,
          persistenceSessionKey,
-         creationRequestId,
+         creationRequestIdRef.current,
        );
 
        if (cancelled) {
@@ -320,7 +314,7 @@ export default function CreateBrochurePage() {
    hydrated,
    loadingMemorial,
    isCreatingNew,
-   creationRequestId,
+   memorialToEdit,
    persistenceSessionKey,
  ]);
 
@@ -352,7 +346,7 @@ export default function CreateBrochurePage() {
       const saved = await persistBrochureDraft(
         draft,
       persistenceSessionKey,
-      creationRequestId,
+      creationRequestIdRef.current,
     );
       if (saved.id !== brochureId) {
         setBrochureId(saved.id);
@@ -387,7 +381,7 @@ export default function CreateBrochurePage() {
     const saved = await persistBrochureDraft(
       publishedDraft,
       persistenceSessionKey,
-      creationRequestId,
+      creationRequestIdRef.current,
     );
 
     if (saved.id !== brochureId) {
@@ -491,7 +485,7 @@ function finishEditingPublishedMemorial() {
       const saved = await persistBrochureDraft(
         draftWithoutPortrait,
         persistenceSessionKey,
-        creationRequestId,
+        creationRequestIdRef.current,
       );
 
       setBrochureId(saved.id);
@@ -530,7 +524,7 @@ function finishEditingPublishedMemorial() {
       const saved = await persistBrochureDraft(
         currentDraft,
         persistenceSessionKey,
-        creationRequestId,
+        creationRequestIdRef.current,
       );
 
       if (saved.id !== brochureId) {
@@ -557,7 +551,7 @@ function finishEditingPublishedMemorial() {
       const savedWithPortrait = await persistBrochureDraft(
         draftWithPortrait,
         persistenceSessionKey,
-        creationRequestId,
+        creationRequestIdRef.current,
       );
 
       setBrochureId(savedWithPortrait.id);

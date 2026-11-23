@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 
 import {
@@ -22,6 +22,7 @@ import type {
 import type { BrochureDraft } from "@/types/brochure";
 
 export default function CondolenceBooksPage() {
+  const router = useRouter();
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
   const [bookData, setBookData] = useState<CondolenceBookData | null>(null);
@@ -162,11 +163,11 @@ async function hydratePage() {
         await navigator.share({
           title: brochure.name
             ? `Book of Condolence for ${brochure.name}`
-            : "Euloges Book of Condolence",
+            : "Lifebree Book of Condolence",
 
           text: brochure.name
-            ? `Sign the Book of Condolence for ${brochure.name} on Euloges.`
-            : "Sign this Book of Condolence on Euloges.",
+            ? `Sign the Book of Condolence for ${brochure.name} on Lifebree.`
+            : "Sign this Book of Condolence on Lifebree.",
 
           url: bookUrl,
         });
@@ -247,12 +248,13 @@ async function hydratePage() {
           No memorial has been created yet.
         </p>
 
-        <Link
-          href={`/create-brochure?new=${Date.now()}`}
+        <button
+          type="button"
+          onClick={() => router.push(`/create-brochure?new=${crypto.randomUUID()}`)}
           className="mt-4 inline-flex rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-sm font-medium text-white"
         >
           Create Memorial
-        </Link>
+        </button>
       </section>
     );
   }
@@ -472,7 +474,7 @@ async function hydratePage() {
             onClick={(event) => event.stopPropagation()}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A9B8E]">
-              Euloges
+              Lifebree
             </p>
 
             <h2 className="mt-2 text-xl font-semibold text-[#2F2F2F]">

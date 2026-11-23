@@ -128,11 +128,11 @@ export default function SignupPage() {
   return (
     <div className="w-full max-w-md rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
       <h1 className="text-center text-2xl font-semibold text-gray-800">
-        Create your Euloges account
+        Create your Lifebree account
       </h1>
 
       <p className="mt-2 text-center text-sm text-gray-500">
-        Begin preserving a life and its memories.
+        Create your space for stories, milestones and memories.
       </p>
 
       <button

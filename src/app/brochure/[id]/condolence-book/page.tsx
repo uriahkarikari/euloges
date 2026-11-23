@@ -123,7 +123,7 @@ useEffect(() => {
       <main className="flex min-h-screen items-center justify-center bg-[#F6F4F1] px-4">
         <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-8 text-center shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A9B8E]">
-            Euloges
+            Lifebree
           </p>
 
           <p className="mt-3 text-sm text-black/50">
@@ -139,7 +139,7 @@ useEffect(() => {
       <main className="flex min-h-screen items-center justify-center bg-[#F6F4F1] px-4">
         <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-8 text-center shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A9B8E]">
-            Euloges
+            Lifebree
           </p>
 
           <h1 className="mt-3 text-2xl font-semibold text-[#2F2F2F]">
@@ -161,7 +161,7 @@ useEffect(() => {
       <div className="mx-auto max-w-3xl space-y-6">
         <header className="rounded-3xl border border-black/10 bg-white p-7 text-center shadow-sm sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#C9A44C]">
-            Euloges
+            Lifebree
           </p>
 
           <div className="relative mx-auto mt-5 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#EEEAE4] shadow-sm">

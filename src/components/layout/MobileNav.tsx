@@ -16,14 +16,14 @@ export default function MobileNav() {
 
   function createNewMemorial() {
     setOpen(false);
-    router.push(`/create-brochure?new=${Date.now()}`);
+    router.push(`/create-brochure?new=${crypto.randomUUID()}`);
   }
 
   return (
     <div className="lg:hidden">
       <div className="flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
         <Link href="/home" onClick={closeMenu}>
-          <span className="text-xl font-semibold text-[#2F2F2F]">Euloges</span>
+          <span className="text-xl font-semibold text-[#2F2F2F]">Lifebree</span>
         </Link>
 
         <button

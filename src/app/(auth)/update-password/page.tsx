@@ -62,7 +62,7 @@ export default function UpdatePasswordPage() {
         </h1>
 
         <p className="mt-3 text-sm leading-6 text-gray-500">
-          Your Euloges password has been changed successfully.
+          Your Lifebree password has been changed successfully.
         </p>
 
         <Link
@@ -82,7 +82,7 @@ export default function UpdatePasswordPage() {
       </h1>
 
       <p className="mt-2 text-center text-sm leading-6 text-gray-500">
-        Choose a new password for your Euloges account.
+        Choose a new password for your Lifebree account.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">

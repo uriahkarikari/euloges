@@ -16,18 +16,6 @@ type PageProps = {
 
 const SITE_URL = "https://www.euloges.com";
 
-function formatMemorialDate(
-  date: string | null,
-): string | null {
-  if (!date) return null;
-
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {

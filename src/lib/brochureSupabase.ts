@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 
-import type { BrochureDraft, BrochureSection } from "@/types/brochure";
+import type { BrochureDraft } from "@/types/brochure";
 
 
 

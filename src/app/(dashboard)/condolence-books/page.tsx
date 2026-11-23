@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QRCodeCanvas } from "qrcode.react";
 
 import {
@@ -22,6 +22,7 @@ import type {
 import type { BrochureDraft } from "@/types/brochure";
 
 export default function CondolenceBooksPage() {
+  const router = useRouter();
   const [brochure, setBrochure] = useState<BrochureDraft | null>(null);
 
   const [bookData, setBookData] = useState<CondolenceBookData | null>(null);
@@ -247,12 +248,13 @@ async function hydratePage() {
           No memorial has been created yet.
         </p>
 
-        <Link
-          href={`/create-brochure?new=${Date.now()}`}
+        <button
+          type="button"
+          onClick={() => router.push(`/create-brochure?new=${crypto.randomUUID()}`)}
           className="mt-4 inline-flex rounded-xl bg-[#2F2F2F] px-4 py-2.5 text-sm font-medium text-white"
         >
           Create Memorial
-        </Link>
+        </button>
       </section>
     );
   }

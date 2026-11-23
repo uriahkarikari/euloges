@@ -65,6 +65,13 @@ export default function DashboardPage() {
     }
   }, []);
 
+  function selectChannel(channel: Channel) {
+    setActiveChannel(channel);
+    if (channel === "Legacy" || channel === "Lifestyle") {
+      void refreshSocialFeed(channel.toLowerCase() as SocialChannel);
+    }
+  }
+
   useEffect(() => {
     let cancelled = false;
     async function initialLoad() {
@@ -82,12 +89,6 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => {
-    if (activeChannel === "Legacy" || activeChannel === "Lifestyle") {
-      void refreshSocialFeed(activeChannel.toLowerCase() as SocialChannel);
-    }
-  }, [activeChannel, refreshSocialFeed]);
-
   const showEulogesFeed = activeChannel === "Euloges" || activeChannel === "For You";
 
   return (
@@ -104,7 +105,7 @@ export default function DashboardPage() {
           </div>
           <div className="mt-5 flex gap-6 overflow-x-auto" role="tablist" aria-label="Lifebree channels">
             {channels.map((channel) => (
-              <button key={channel} type="button" role="tab" aria-selected={activeChannel === channel} onClick={() => setActiveChannel(channel)} className={`relative shrink-0 border-b-2 px-1 pb-3 text-sm font-medium transition ${activeChannel === channel ? "border-[#A17D32] text-[#302F2B]" : "border-transparent text-[#89837A] hover:text-[#302F2B]"}`}>
+              <button key={channel} type="button" role="tab" aria-selected={activeChannel === channel} onClick={() => selectChannel(channel)} className={`relative shrink-0 border-b-2 px-1 pb-3 text-sm font-medium transition ${activeChannel === channel ? "border-[#A17D32] text-[#302F2B]" : "border-transparent text-[#89837A] hover:text-[#302F2B]"}`}>
                 {channel}
               </button>
             ))}
@@ -120,7 +121,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {(["Lifestyle", "Legacy", "Euloges"] as const).map((channel) => (
-                <button key={channel} type="button" onClick={() => setActiveChannel(channel)} className="rounded-xl border border-[#EAE4DA] p-4 text-left transition hover:border-[#C9A44C] hover:bg-[#FCFAF7]">
+                <button key={channel} type="button" onClick={() => selectChannel(channel)} className="rounded-xl border border-[#EAE4DA] p-4 text-left transition hover:border-[#C9A44C] hover:bg-[#FCFAF7]">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#A17D32]">{channel}</span>
                   <span className="mt-2 block text-sm font-semibold text-[#302F2B]">{channel === "Lifestyle" ? "Share life as it happens" : channel === "Legacy" ? "Preserve stories for tomorrow" : "Remember and celebrate lives"}</span>
                   <span className="mt-1 block text-xs leading-5 text-[#817B72]">{channel === "Lifestyle" ? "Experiences, interests and milestones." : channel === "Legacy" ? "Family histories and personal archives." : "Memorials, tributes and condolences."}</span>
@@ -152,7 +153,7 @@ export default function DashboardPage() {
 
       {showEulogesFeed && (
         <section className="space-y-4">
-          {activeChannel === "For You" && <div className="flex items-center justify-between px-1"><h2 className="text-sm font-semibold text-[#514C45]">From Euloges</h2><button type="button" onClick={() => setActiveChannel("Euloges")} className="text-xs font-medium text-[#9A762F] hover:underline">Open Euloges</button></div>}
+          {activeChannel === "For You" && <div className="flex items-center justify-between px-1"><h2 className="text-sm font-semibold text-[#514C45]">From Euloges</h2><button type="button" onClick={() => selectChannel("Euloges")} className="text-xs font-medium text-[#9A762F] hover:underline">Open Euloges</button></div>}
           {activeChannel === "Euloges" && <FeedComposer onMemoryPosted={refreshFeed} />}
           {loading && <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">Loading remembrance activity...</div>}
           {error && <div role="alert" className="rounded-2xl border border-red-100 bg-white p-6 text-sm text-red-600">{error}</div>}

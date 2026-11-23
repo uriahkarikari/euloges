@@ -24,13 +24,13 @@ export default function ContactPage() {
           </p>
 
           <h1 className="mt-5 text-4xl font-medium tracking-tight sm:text-5xl">
-            We're here to help.
+            We&apos;re here to help.
           </h1>
 
           <p className="mt-6 max-w-xl text-base leading-8 text-[#716C64]">
             Whether you need help creating a memorial, have a question
             about Lifebree or simply want to know more about our platform,
-            we'd be happy to hear from you.
+            we&apos;d be happy to hear from you.
           </p>
 
           <div className="mt-12 grid gap-5 sm:grid-cols-2">
@@ -45,7 +45,7 @@ export default function ContactPage() {
               <p className="mt-6 text-xl font-medium">{phone}</p>
 
               <p className="mt-2 text-sm leading-6 text-[#827C73]">
-                Send us a message and we'll be happy to assist.
+                Send us a message and we&apos;ll be happy to assist.
               </p>
 
               <a

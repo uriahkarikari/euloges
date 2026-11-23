@@ -103,7 +103,7 @@ export default function PublicHomePage() {
           </h1>
 
           <p className="mt-8 max-w-xl text-base leading-8 text-[#716C64] sm:text-lg">
-            Lifebree is a home for life's stories, milestones and memories. Begin by
+            Lifebree is a home for life&apos;s stories, milestones and memories. Begin by
             creating a lasting remembrance of someone you love, bringing their
             story, photographs, tributes and the people who remember them together.
           </p>

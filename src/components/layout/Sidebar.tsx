@@ -9,7 +9,7 @@ export default function Sidebar() {
   const router = useRouter();
 
   function createNewMemorial() {
-    router.push(`/create-brochure?new=${Date.now()}`);
+    router.push(`/create-brochure?new=${crypto.randomUUID()}`);
   }
   return (
     <aside className="sticky top-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">

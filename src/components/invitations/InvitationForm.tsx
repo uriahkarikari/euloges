@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+type InvitationSection = { id: string; title: string; content: string };
 type Invitation = {
   id: string;
   title?: string;
@@ -14,6 +15,7 @@ type Invitation = {
   map_url?: string | null;
   description?: string | null;
   cover_image_url?: string | null;
+  sections?: InvitationSection[] | null;
 };
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
@@ -35,6 +37,7 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
   const [cover, setCover] = useState(invitation?.cover_image_url ?? "");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState(invitation?.cover_image_url ?? "");
+  const [sections, setSections] = useState<InvitationSection[]>(invitation?.sections ?? []);
   const field = "w-full rounded-xl border border-[#E5DED3] bg-white px-3 py-2.5 text-sm text-[#302F2B]";
 
   function chooseImage(file?: File) {
@@ -53,6 +56,20 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
     setCover("");
   }
 
+  function updateSection(id: string, fieldName: "title" | "content", value: string) {
+    setSections((current) => current.map((section) => section.id === id ? { ...section, [fieldName]: value } : section));
+  }
+
+  function moveSection(index: number, direction: -1 | 1) {
+    setSections((current) => {
+      const target = index + direction;
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  }
+
   async function save(status: "draft" | "published") {
     setError("");
     if (!title.trim() || !host.trim() || !date || !time) {
@@ -61,6 +78,10 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
     }
     if (map && !/^https:\/\//i.test(map)) {
       setError("The map link must begin with https://");
+      return;
+    }
+    if (sections.some((section) => !section.title.trim() || !section.content.trim())) {
+      setError("Complete or remove each custom section before saving.");
       return;
     }
 
@@ -102,6 +123,7 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
       map_url: map.trim() || null,
       description: description.trim() || null,
       cover_image_url: coverUrl,
+      sections: sections.map((section) => ({ ...section, title: section.title.trim(), content: section.content.trim() })),
       status,
       updated_at: new Date().toISOString(),
     };
@@ -143,9 +165,7 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
         {preview && (
           <div className="mt-4">
             <img src={preview} alt="Invitation image preview" className="max-h-80 w-full rounded-xl object-contain bg-white" />
-            <button type="button" onClick={() => { setImageFile(null); setPreview(""); setCover(""); if (fileInput.current) fileInput.current.value = ""; }} className="mt-2 text-xs text-red-700 underline">
-              Remove image
-            </button>
+            <button type="button" onClick={() => { setImageFile(null); setPreview(""); setCover(""); if (fileInput.current) fileInput.current.value = ""; }} className="mt-2 text-xs text-red-700 underline">Remove image</button>
           </div>
         )}
         {!imageFile && cover && !preview && <p className="mt-3 text-xs text-[#817B72]">An image URL is currently saved for this invitation.</p>}
@@ -174,6 +194,43 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
           <textarea className={field + " mt-1 min-h-28"} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Add a welcome message or useful details..." />
         </label>
       </div>
+
+      <section className="mt-8 border-t border-[#E9E2D8] pt-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold text-[#302F2B]">Invitation sections</h2>
+            <p className="mt-1 text-sm text-[#817B72]">Add details such as the programme, order of events, readings, songs, dress code or other notes for your guests. Arrange sections in the order they should appear.</p>
+          </div>
+          <button type="button" onClick={() => setSections((current) => [...current, { id: crypto.randomUUID(), title: "", content: "" }])} className="shrink-0 rounded-xl bg-[#302F2B] px-4 py-2.5 text-sm font-medium text-white">+ Add section</button>
+        </div>
+        {sections.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-[#D9CDBB] bg-[#FAF8F5] p-6 text-center">
+            <p className="text-sm text-[#817B72]">No additional sections yet.</p>
+            <p className="mt-1 text-xs text-[#A29A8E]">Your invitation can include as many custom sections as you need.</p>
+          </div>
+        ) : (
+          <div className="mt-4 space-y-4">
+            {sections.map((section, index) => (
+              <div key={section.id} className="rounded-xl border border-[#E5DED3] bg-[#FCFBF9] p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-[#918A80]">Section {index + 1}</span>
+                  <div className="flex items-center gap-3 text-xs">
+                    <button type="button" disabled={index === 0} onClick={() => moveSection(index, -1)} className="text-[#817B72] underline disabled:opacity-30">Move up</button>
+                    <button type="button" disabled={index === sections.length - 1} onClick={() => moveSection(index, 1)} className="text-[#817B72] underline disabled:opacity-30">Move down</button>
+                    <button type="button" onClick={() => setSections((current) => current.filter((item) => item.id !== section.id))} className="text-red-700 underline">Remove</button>
+                  </div>
+                </div>
+                <label className="block text-sm font-medium text-[#514C45]">Section title
+                  <input className={field + " mt-1"} value={section.title} onChange={(event) => updateSection(section.id, "title", event.target.value)} placeholder="e.g. Programme of events" maxLength={120} />
+                </label>
+                <label className="mt-3 block text-sm font-medium text-[#514C45]">Section details
+                  <textarea className={field + " mt-1 min-h-28"} value={section.content} onChange={(event) => updateSection(section.id, "content", event.target.value)} placeholder="Add programme details, readings, songs, instructions or other information..." maxLength={10000} />
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div className="mt-6 flex flex-wrap gap-3">

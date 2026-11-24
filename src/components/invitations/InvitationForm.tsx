@@ -157,7 +157,7 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
         <button type="button" onClick={() => setMobileView("editor")} aria-pressed={mobileView === "editor"} className={`rounded-xl border px-4 py-2.5 text-sm font-medium ${mobileView === "editor" ? "border-[#302F2B] bg-[#302F2B] text-white" : "border-[#E5DED3] bg-white text-[#514C45]"}`}>Edit invitation</button>
         <button type="button" onClick={() => setMobileView("preview")} aria-pressed={mobileView === "preview"} className={`rounded-xl border px-4 py-2.5 text-sm font-medium ${mobileView === "preview" ? "border-[#302F2B] bg-[#302F2B] text-white" : "border-[#E5DED3] bg-white text-[#514C45]"}`}>Preview</button>
       </div>
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.9fr)]">
         <div className={mobileView === "preview" ? "hidden lg:block" : "block"}>
           <div className="rounded-2xl border border-[#E9E2D8] bg-white p-5 shadow-sm sm:p-7">
       <div className="mb-6 rounded-2xl border border-dashed border-[#D9CDBB] bg-[#FAF8F5] p-4">
@@ -250,7 +250,12 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
           </div>
         </div>
         <div className={mobileView === "editor" ? "hidden lg:block" : "block"}>
-          <div className="xl:sticky xl:top-6">
+          <div className="lg:sticky lg:top-6">
+            {invitation?.id && (
+              <div className="mb-3 flex justify-end">
+                <a href={`/invitations/${invitation.id}/preview`} target="_blank" rel="noreferrer" className="text-sm font-medium text-[#8A6B2E] underline underline-offset-4">Open full-page preview</a>
+              </div>
+            )}
             <InvitationPreview invitation={{
               title,
               host_name: host,

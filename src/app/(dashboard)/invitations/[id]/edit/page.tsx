@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import InvitationForm from "@/components/invitations/InvitationForm";
 
+type InvitationSection = { id: string; title: string; content: string };
 type InvitationRecord = {
   id: string;
   title: string;
@@ -15,6 +16,7 @@ type InvitationRecord = {
   map_url: string | null;
   description: string | null;
   cover_image_url: string | null;
+  sections: InvitationSection[] | null;
 };
 
 export default function EditInvitationPage() {
@@ -28,7 +30,7 @@ export default function EditInvitationPage() {
     async function loadInvitation() {
       const { data, error: loadError } = await createClient()
         .from("invitations")
-        .select("id,title,host_name,starts_at,venue_name,venue_address,map_url,description,cover_image_url")
+        .select("id,title,host_name,starts_at,venue_name,venue_address,map_url,description,cover_image_url,sections")
         .eq("id", id)
         .single();
 

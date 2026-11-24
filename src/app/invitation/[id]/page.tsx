@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { QRCodeCanvas } from "qrcode.react";
 
+type InvitationSection = { id: string; title: string; content: string };
 type Invite = {
   id: string;
   title: string;
@@ -15,6 +16,7 @@ type Invite = {
   venue_address: string | null;
   map_url: string | null;
   cover_image_url: string | null;
+  sections: InvitationSection[] | null;
 };
 
 export default function PublicInvitationPage() {
@@ -37,7 +39,7 @@ export default function PublicInvitationPage() {
     async function loadInvitation() {
       const { data, error: loadError } = await createClient()
         .from("invitations")
-        .select("id,title,host_name,description,starts_at,venue_name,venue_address,map_url,cover_image_url")
+        .select("id,title,host_name,description,starts_at,venue_name,venue_address,map_url,cover_image_url,sections")
         .eq("id", id)
         .eq("status", "published")
         .maybeSingle();
@@ -92,7 +94,17 @@ export default function PublicInvitationPage() {
             {item.venue_address && <p className="mt-1">{item.venue_address}</p>}
             {item.map_url && <a href={item.map_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[#9A762F] underline">Get directions</a>}
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          {item.sections && item.sections.length > 0 && (
+            <div className="mt-8 space-y-4 text-left">
+              {item.sections.map((section) => (
+                <section key={section.id} className="rounded-2xl border border-[#E9E2D8] bg-[#FCFBF9] p-5">
+                  <h2 className="font-serif text-xl text-[#302F2B]">{section.title}</h2>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-[#514C45]">{section.content}</p>
+                </section>
+              ))}
+            </div>
+          )}
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
             <button type="button" onClick={() => navigator.share ? void navigator.share({ title: item.title, url }) : void navigator.clipboard.writeText(url)} className="rounded-xl bg-[#302F2B] px-4 py-2.5 text-sm text-white">Share invitation</button>
             <div className="rounded-xl border p-2"><QRCodeCanvas value={url} size={104} includeMargin /><p className="text-[10px] text-[#817B72]">Scan to open</p></div>
           </div>

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import InvitationPreview from "@/components/invitations/InvitationPreview";
 
 type InvitationSection = { id: string; title: string; content: string };
 type Invitation = {
@@ -38,6 +39,7 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [preview, setPreview] = useState(invitation?.cover_image_url ?? "");
   const [sections, setSections] = useState<InvitationSection[]>(invitation?.sections ?? []);
+  const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
   const field = "w-full rounded-xl border border-[#E5DED3] bg-white px-3 py-2.5 text-sm text-[#302F2B]";
 
   function chooseImage(file?: File) {
@@ -150,7 +152,14 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
   }
 
   return (
-    <div className="rounded-2xl border border-[#E9E2D8] bg-white p-5 shadow-sm sm:p-7">
+    <>
+      <div className="mb-4 grid grid-cols-2 gap-2 lg:hidden">
+        <button type="button" onClick={() => setMobileView("editor")} aria-pressed={mobileView === "editor"} className={`rounded-xl border px-4 py-2.5 text-sm font-medium ${mobileView === "editor" ? "border-[#302F2B] bg-[#302F2B] text-white" : "border-[#E5DED3] bg-white text-[#514C45]"}`}>Edit invitation</button>
+        <button type="button" onClick={() => setMobileView("preview")} aria-pressed={mobileView === "preview"} className={`rounded-xl border px-4 py-2.5 text-sm font-medium ${mobileView === "preview" ? "border-[#302F2B] bg-[#302F2B] text-white" : "border-[#E5DED3] bg-white text-[#514C45]"}`}>Preview</button>
+      </div>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)]">
+        <div className={mobileView === "preview" ? "hidden lg:block" : "block"}>
+          <div className="rounded-2xl border border-[#E9E2D8] bg-white p-5 shadow-sm sm:p-7">
       <div className="mb-6 rounded-2xl border border-dashed border-[#D9CDBB] bg-[#FAF8F5] p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -238,6 +247,25 @@ export default function InvitationForm({ invitation }: { invitation?: Invitation
         <button disabled={saving} onClick={() => save("published")} className="rounded-xl bg-[#302F2B] px-5 py-2.5 text-sm text-white">{saving ? "Saving…" : "Publish invitation"}</button>
       </div>
       <p className="mt-3 text-xs text-[#918A80]">Published invitations are accessible to anyone with the link. Guests do not need a Lifebree account.</p>
-    </div>
+          </div>
+        </div>
+        <div className={mobileView === "editor" ? "hidden lg:block" : "block"}>
+          <div className="xl:sticky xl:top-6">
+            <InvitationPreview invitation={{
+              title,
+              host_name: host,
+              date,
+              time,
+              venue_name: venue,
+              venue_address: address,
+              map_url: map,
+              description,
+              cover_image_url: preview || cover,
+              sections,
+            }} />
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

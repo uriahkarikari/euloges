@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import FeedComposer from "@/components/feed/FeedComposer";
 import PostCard from "@/components/feed/PostCard";
+import SocialPostComposer from "@/components/feed/SocialPostComposer";
+import SocialPostCard from "@/components/feed/SocialPostCard";
 import { loadHomeFeed, type HomeFeedItem } from "@/lib/homeFeedRepository";
+import { loadSocialFeed, type SocialChannel, type SocialPost } from "@/lib/socialFeedRepository";
 
 type Channel = "For You" | "Legacy" | "Euloges" | "Lifestyle";
-
 const channels: Channel[] = ["For You", "Legacy", "Euloges", "Lifestyle"];
 
 const channelDetails: Record<Exclude<Channel, "For You">, { eyebrow: string; title: string; description: string; ideas: string[] }> = {
@@ -34,8 +36,11 @@ const channelDetails: Record<Exclude<Channel, "For You">, { eyebrow: string; tit
 export default function DashboardPage() {
   const [activeChannel, setActiveChannel] = useState<Channel>("For You");
   const [feed, setFeed] = useState<HomeFeedItem[]>([]);
+  const [socialFeed, setSocialFeed] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [socialLoading, setSocialLoading] = useState(false);
   const [error, setError] = useState("");
+  const [socialError, setSocialError] = useState("");
 
   const refreshFeed = useCallback(async () => {
     try {
@@ -46,6 +51,26 @@ export default function DashboardPage() {
       setError("Unable to load remembrance activity right now.");
     }
   }, []);
+
+  const refreshSocialFeed = useCallback(async (channel: SocialChannel) => {
+    setSocialLoading(true);
+    setSocialError("");
+    try {
+      setSocialFeed(await loadSocialFeed(channel));
+    } catch (loadError) {
+      console.error("Unable to load Lifebree social feed:", loadError);
+      setSocialError(loadError instanceof Error ? loadError.message : "Unable to load this feed.");
+    } finally {
+      setSocialLoading(false);
+    }
+  }, []);
+
+  function selectChannel(channel: Channel) {
+    setActiveChannel(channel);
+    if (channel === "Legacy" || channel === "Lifestyle") {
+      void refreshSocialFeed(channel.toLowerCase() as SocialChannel);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -80,7 +105,7 @@ export default function DashboardPage() {
           </div>
           <div className="mt-5 flex gap-6 overflow-x-auto" role="tablist" aria-label="Lifebree channels">
             {channels.map((channel) => (
-              <button key={channel} type="button" role="tab" aria-selected={activeChannel === channel} onClick={() => setActiveChannel(channel)} className={`relative shrink-0 border-b-2 px-1 pb-3 text-sm font-medium transition ${activeChannel === channel ? "border-[#A17D32] text-[#302F2B]" : "border-transparent text-[#89837A] hover:text-[#302F2B]"}`}>
+              <button key={channel} type="button" role="tab" aria-selected={activeChannel === channel} onClick={() => selectChannel(channel)} className={`relative shrink-0 border-b-2 px-1 pb-3 text-sm font-medium transition ${activeChannel === channel ? "border-[#A17D32] text-[#302F2B]" : "border-transparent text-[#89837A] hover:text-[#302F2B]"}`}>
                 {channel}
               </button>
             ))}
@@ -96,7 +121,7 @@ export default function DashboardPage() {
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {(["Lifestyle", "Legacy", "Euloges"] as const).map((channel) => (
-                <button key={channel} type="button" onClick={() => setActiveChannel(channel)} className="rounded-xl border border-[#EAE4DA] p-4 text-left transition hover:border-[#C9A44C] hover:bg-[#FCFAF7]">
+                <button key={channel} type="button" onClick={() => selectChannel(channel)} className="rounded-xl border border-[#EAE4DA] p-4 text-left transition hover:border-[#C9A44C] hover:bg-[#FCFAF7]">
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#A17D32]">{channel}</span>
                   <span className="mt-2 block text-sm font-semibold text-[#302F2B]">{channel === "Lifestyle" ? "Share life as it happens" : channel === "Legacy" ? "Preserve stories for tomorrow" : "Remember and celebrate lives"}</span>
                   <span className="mt-1 block text-xs leading-5 text-[#817B72]">{channel === "Lifestyle" ? "Experiences, interests and milestones." : channel === "Legacy" ? "Family histories and personal archives." : "Memorials, tributes and condolences."}</span>
@@ -112,14 +137,23 @@ export default function DashboardPage() {
             <div className="mt-5 grid gap-2 sm:grid-cols-3">
               {channelDetails[activeChannel].ideas.map((idea) => <div key={idea} className="rounded-xl bg-[#F7F4EF] p-3 text-sm text-[#625D55]">{idea}</div>)}
             </div>
-            {activeChannel !== "Euloges" && <p className="mt-5 rounded-lg border border-dashed border-[#D8D0C4] p-4 text-sm text-[#817B72]">This channel’s dedicated publishing and archive tools are part of the frontend build. No content is being saved from this preview yet.</p>}
           </div>
         )}
       </section>
 
+      {(activeChannel === "Legacy" || activeChannel === "Lifestyle") && (
+        <section className="space-y-4">
+          <SocialPostComposer channel={activeChannel.toLowerCase() as SocialChannel} onPosted={() => void refreshSocialFeed(activeChannel.toLowerCase() as SocialChannel)} />
+          {socialLoading && <div className="rounded-2xl border border-[#E9E2D8] bg-white p-6 text-sm text-[#918A80]">Loading {activeChannel.toLowerCase()} stories…</div>}
+          {socialError && <div role="alert" className="rounded-2xl border border-red-100 bg-white p-5 text-sm text-red-600">{socialError}</div>}
+          {!socialLoading && !socialError && socialFeed.length === 0 && <div className="rounded-2xl border border-[#E9E2D8] bg-white p-6 text-center"><p className="text-sm font-medium text-[#514C45]">Your {activeChannel.toLowerCase()} feed is ready.</p><p className="mt-1 text-xs text-[#918A80]">Be the first to share a story.</p></div>}
+          {!socialLoading && socialFeed.map((post) => <SocialPostCard key={post.id} post={post} onChanged={() => void refreshSocialFeed(activeChannel.toLowerCase() as SocialChannel)} />)}
+        </section>
+      )}
+
       {showEulogesFeed && (
         <section className="space-y-4">
-          {activeChannel === "For You" && <div className="flex items-center justify-between px-1"><h2 className="text-sm font-semibold text-[#514C45]">From Euloges</h2><button type="button" onClick={() => setActiveChannel("Euloges")} className="text-xs font-medium text-[#9A762F] hover:underline">Open Euloges</button></div>}
+          {activeChannel === "For You" && <div className="flex items-center justify-between px-1"><h2 className="text-sm font-semibold text-[#514C45]">From Euloges</h2><button type="button" onClick={() => selectChannel("Euloges")} className="text-xs font-medium text-[#9A762F] hover:underline">Open Euloges</button></div>}
           {activeChannel === "Euloges" && <FeedComposer onMemoryPosted={refreshFeed} />}
           {loading && <div className="rounded-2xl border border-gray-100 bg-white p-6 text-sm text-gray-400">Loading remembrance activity...</div>}
           {error && <div role="alert" className="rounded-2xl border border-red-100 bg-white p-6 text-sm text-red-600">{error}</div>}

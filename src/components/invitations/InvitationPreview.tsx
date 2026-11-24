@@ -53,10 +53,10 @@ export default function InvitationPreview({
           <p className="mt-3 text-sm text-[#817B72]">Hosted by {invitation.host_name?.trim() || "Host / organiser"}</p>
           {invitation.description?.trim() && <p className="mx-auto mt-6 max-w-lg whitespace-pre-wrap text-sm leading-7 text-[#514C45]">{invitation.description}</p>}
           <div className="my-7 rounded-2xl bg-[#F7F4EF] p-5 text-sm">
-            <p className="font-semibold text-[#302F2B]">{validDate ? startsAt.toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" }) : "Event date and time"}</p>
+            <p className="font-semibold text-[#302F2B]">{validDate && startsAt ? startsAt.toLocaleString(undefined, { dateStyle: "full", timeStyle: "short" }) : "Event date and time"}</p>
             {invitation.venue_name?.trim() && <p className="mt-2 font-medium text-[#302F2B]">{invitation.venue_name}</p>}
             {invitation.venue_address?.trim() && <p className="mt-1 text-[#514C45]">{invitation.venue_address}</p>}
-            {invitation.map_url?.trim() && <p className="mt-3 text-[#9A762F] underline">Get directions</p>}
+            {invitation.map_url?.trim() && (mode === "published" ? <a href={invitation.map_url} target="_blank" rel="noreferrer" className="mt-3 inline-block text-[#9A762F] underline">Get directions</a> : <p className="mt-3 text-[#9A762F] underline">Get directions</p>)}
           </div>
           {!!invitation.sections?.length && (
             <div className="mt-8 space-y-4 text-left">
